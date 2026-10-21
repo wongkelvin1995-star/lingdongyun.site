@@ -1,107 +1,91 @@
-# 灵动云官网（lingdongyun.site）
+<div align="center">
 
-Astro 5 + TypeScript + 原生 CSS 构建的纯静态网站。首页、文章列表与文章正文都直接输出在 HTML 中，不依赖浏览器端 JavaScript 渲染（JS 仅用于手机菜单与套餐筛选）。
+<a href="https://lingdongyun.site/"><img src="public/logo-512.png" width="120" alt="灵动云 Logo"></a>
 
-## 本地运行
+# 灵动云官网
 
-需要 Node.js 18.20+ / 20.3+ / 22+。
+**LINGDONG CLOUD · lingdongyun.site**
 
-```bash
-npm install        # 安装依赖
-npm run dev        # 本地开发：http://localhost:4321
-npm run build      # 构建静态文件到 dist/
-npm run preview    # 预览构建结果
-npm run check:site # 构建后自动检查（链接、canonical、套餐、字数、sitemap 等）
-```
+月付、年付与一次性流量包套餐，附 Clash / Clash Party 客户端使用指南
 
-## 目录结构
+[🌐 访问官网](https://lingdongyun.site/) &nbsp;·&nbsp; [📝 立即注册](https://varnexa.lingdongaff.com/#/?code=HHoxxHGa) &nbsp;·&nbsp; [📖 使用指南](https://lingdongyun.site/guides/)
 
-```
-src/
-  data/site.ts            品牌信息、注册链接、8 档套餐、FAQ（全站唯一数据源）
-  content/guides/*.md     8 篇文章正文（Markdown）
-  content.config.ts       文章字段定义
-  layouts/Base.astro      公共 <head>、SEO 标签、页头页脚
-  components/             Header / Footer / HeroArt（原创 SVG 插画）/ Logo / Icon / Breadcrumb
-  pages/
-    index.astro           首页
-    guides/index.astro    文章列表 /guides/
-    guides/[slug].astro   文章页 /guides/<slug>/
-    sitemap/index.astro   HTML 网站地图 /sitemap/
-    sitemap.xml.ts        XML 网站地图（lastmod 取内容真实日期）
-    llms.txt.ts           内容导航 /llms.txt
-    404.astro             404 页面（noindex）
-public/                   favicon、分享图 og-image.png、robots.txt
-scripts/check-site.mjs    构建后检查脚本
-dist/                     构建产物（直接部署这个目录）
-```
+</div>
 
-## 修改内容
+<a href="https://lingdongyun.site/"><img src="public/og-image.png" alt="灵动云官网" width="100%"></a>
 
-- **套餐 / 注册链接 / FAQ**：只改 `src/data/site.ts`，首页、结构化数据和 llms.txt 会同步更新。
-- **文章**：编辑 `src/content/guides/*.md`。实质修改后同步更新 frontmatter 的 `updated` 日期（会写入页面和 sitemap 的 lastmod）。
-- **站点更新日期**：修改首页内容后，同步更新 `src/data/site.ts` 中的 `updated`。
+## 关于灵动云
 
-## 部署到 lingdongyun.site
+灵动云（LINGDONG CLOUD，拼音 lingdongyun）是一个机场服务品牌。“灵动云机场”“灵动云VPN”“灵动云官网”都是用户对同一品牌的不同叫法。
 
-构建命令 `npm run build`，输出目录 `dist`。任选一种：
+- **官网地址：** [https://lingdongyun.site](https://lingdongyun.site/)
+- **注册入口：** [点击这里注册 / 登录](https://varnexa.lingdongaff.com/#/?code=HHoxxHGa)
+- **套餐选择：** 月付、年付、一次性流量包三种，按需选择
+- **客户端：** 可配合 Clash、Clash Party 等客户端使用
 
-### 方式 A：Cloudflare Pages / Netlify / Vercel（推荐）
+> ⚠️ 请认准官网 **lingdongyun.site**，注意辨别名称相似的仿冒网站。
 
-1. 把本项目推送到 GitHub / GitLab 仓库（`node_modules`、`dist` 不需要提交）。
-2. 在平台新建项目并连接仓库：
-   - Framework preset：Astro
-   - Build command：`npm run build`
-   - Output directory：`dist`
-   - Node 版本：20 或 22
-3. 在平台的“自定义域名”中添加 `lingdongyun.site`（可再加 `www.lingdongyun.site` 并设置 301 跳转到不带 www 的正式域名）。
-4. 按平台给出的记录到域名注册商处修改 DNS（CNAME 或 A 记录）。DNS 修改需要你本人操作。
-5. 平台会自动签发 HTTPS 证书。确认 `http://` 自动跳转到 `https://`。
+## 套餐价格
 
-这几个平台会自动把 `dist/404.html` 作为不存在路径的页面，并返回 404 状态码。
+### 月付套餐
 
-### 方式 B：自有服务器（Nginx）
+| 套餐 | 价格 | 流量 |
+| :--- | :---: | :---: |
+| 灵动·拂风 | **¥20** / 月起 | 100GB / 月 |
+| 灵动·驭浪 🔥 日常进阶 | **¥50** / 月起 | 300GB / 月 |
+| 灵动·破晓 | **¥100** / 月起 | 700GB / 月 |
+| 灵动·凌霄 | **¥180** / 月起 | 1.5TB / 月 |
 
-把 `dist/` 内的全部文件上传到服务器，例如 `/var/www/lingdongyun.site`，Nginx 配置示例：
+### 年付套餐
 
-```nginx
-server {
-  listen 80;
-  server_name lingdongyun.site www.lingdongyun.site;
-  return 301 https://lingdongyun.site$request_uri;
-}
-server {
-  listen 443 ssl http2;
-  server_name www.lingdongyun.site;
-  # ssl_certificate ... ;
-  return 301 https://lingdongyun.site$request_uri;
-}
-server {
-  listen 443 ssl http2;
-  server_name lingdongyun.site;
-  # ssl_certificate     /etc/letsencrypt/live/lingdongyun.site/fullchain.pem;
-  # ssl_certificate_key /etc/letsencrypt/live/lingdongyun.site/privkey.pem;
-  root /var/www/lingdongyun.site;
-  index index.html;
+| 套餐 | 价格 | 流量 |
+| :--- | :---: | :---: |
+| 灵动·穿云 | **¥99** / 年 | 70GB / 月 |
 
-  # 无尾斜杠的目录统一 301 到带尾斜杠的地址
-  location / {
-    try_files $uri $uri/ =404;
-  }
-  error_page 404 /404.html;   # 不存在的路径返回 404，而不是首页 + 200
+### 一次性流量包
 
-  location ~* \.(css|js|png|svg|jpg|webp|woff2)$ {
-    expires 30d;
-    add_header Cache-Control "public";
-  }
-}
-```
+| 套餐 | 价格 | 流量 |
+| :--- | :---: | :---: |
+| 灵动·闲云 | **¥199** / 一次性 | 150GB 总流量 |
+| 灵动·惊云 | **¥499** / 一次性 | 400GB 总流量 |
+| 灵动·飞云 | **¥899** / 一次性 | 800GB 总流量 |
 
-HTTPS 证书可用 Let's Encrypt（certbot）免费签发。
+> 套餐信息以注册后台实际展示为准。年付套餐为每月 70GB；一次性流量包为总流量，不是每月流量。
 
-### 上线后检查
+<div align="center">
 
-- 访问 `https://lingdongyun.site/`、`/guides/`、任意文章页正常打开；
-- 访问一个不存在的地址（如 `/abc/`）返回 404 页面且状态码为 404；
-- `https://lingdongyun.site/robots.txt`、`/sitemap.xml` 可访问；
-- 可在 Google Search Console、Bing Webmaster Tools、百度搜索资源平台验证站点后提交 sitemap.xml（是否收录与排名由搜索引擎决定）。
+### [👉 立即注册，选择套餐](https://varnexa.lingdongaff.com/#/?code=HHoxxHGa)
+
+</div>
+
+## 使用指南
+
+- [灵动云官网是哪个？官方网址、注册入口与防仿冒说明](https://lingdongyun.site/guides/lingdongyun-official/)
+- [灵动云新手上手指南：从注册、选套餐到首次连接](https://lingdongyun.site/guides/getting-started/)
+- [灵动云套餐怎么选？月付、年付与一次性流量包按需选购指南](https://lingdongyun.site/guides/plan-selection/)
+- [多端客户端指南：电脑与手机如何选择 Clash、Clash Party 与小火箭](https://lingdongyun.site/guides/multi-device-clients/)
+- [Clash 节点使用指南：订阅导入、更新与常见排错](https://lingdongyun.site/guides/clash-nodes/)
+- [Clash Party 机场配置指南：从订阅准备到日常维护](https://lingdongyun.site/guides/clashparty-airport/)
+
+[查看全部指南 →](https://lingdongyun.site/guides/)
+
+## 常见问题
+
+**灵动云有哪些套餐，最低多少钱？**
+共 8 档套餐：4 档月付（¥20 起）、1 档年付（¥99 / 年）、3 档一次性流量包（¥199 起）。最低是月付套餐灵动·拂风，¥20 / 月起。
+
+**如何注册？**
+点击上方“立即注册”，进入灵动云官方账户平台完成注册、选购和订阅管理。
+
+**订阅链接可以分享给别人吗？**
+不建议。订阅链接与你的账户绑定，别人拿到后可能消耗你的流量。
+
+更多问题请查看 [官网常见问题](https://lingdongyun.site/#faq)。
+
+---
+
+<div align="center">
+
+© 灵动云 LINGDONG CLOUD · [lingdongyun.site](https://lingdongyun.site/)
+
+</div>
