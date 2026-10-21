@@ -1,0 +1,132 @@
+---
+import Logo from './Logo.astro';
+import { PLANS, SITE } from '../data/site';
+const minPrice = Math.min(...PLANS.filter((p) => p.category === 'monthly').map((p) => p.price));
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-cta">
+      <div>
+        <p class="cta-title">按需选择套餐，开始灵动连接</p>
+        <p class="cta-text">月付 ¥{minPrice} 起 · 年付 ¥99（每月 70GB）· 一次性流量包 150GB–800GB 总流量</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href={SITE.registerUrl} target="_blank" rel="noopener">立即注册</a>
+        <a class="btn btn-ghost" href="/#pricing">查看套餐</a>
+      </div>
+    </div>
+
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="f-brand" href="/" aria-label="灵动云官网首页">
+          <Logo size={40} dark />
+          <span><strong>{SITE.brand}</strong><small>{SITE.brandEn}</small></span>
+        </a>
+        <p>灵动云（LINGDONG CLOUD，lingdongyun）官网为 lingdongyun.site。灵动云机场提供月付、年付与一次性流量包三类套餐，并整理机场选购方法与 Clash、Clash Party、小火箭等客户端使用指南，帮助你选得明白、用得顺手。</p>
+        <ul class="f-facts">
+          <li><span>官方域名</span><a href={SITE.url + '/'}>lingdongyun.site</a></li>
+          <li><span>账户平台</span><a href={SITE.registerUrl} target="_blank" rel="noopener">注册 / 登录</a></li>
+        </ul>
+      </div>
+
+      <nav class="footer-nav" aria-label="页脚导航">
+        <div>
+          <p class="fh">站内导航</p>
+          <ul>
+            <li><a href="/">首页</a></li>
+            <li><a href="/#pricing">套餐价格</a></li>
+            <li><a href="/#guides">教学指南</a></li>
+            <li><a href="/#features">服务优势</a></li>
+            <li><a href="/#faq">常见问题</a></li>
+            <li><a href="/sitemap/">网站地图</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="fh">套餐类型</p>
+          <ul>
+            <li><a href="/#pricing">月付套餐 · ¥{minPrice} 起</a></li>
+            <li><a href="/#pricing">年付套餐 · ¥99 / 年</a></li>
+            <li><a href="/#pricing">一次性流量包</a></li>
+            <li><a href="/guides/plan-selection/">灵动云套餐怎么选</a></li>
+            <li><a href="/#faq">计费方式说明</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="fh">选购知识</p>
+          <ul>
+            <li><a href="/guides/cheap-airport-guide/">便宜机场怎么选</a></li>
+            <li><a href="/guides/safe-airport-guide/">安全机场如何判断</a></li>
+            <li><a href="/guides/airport-recommendation-2026/">2026 机场推荐指南</a></li>
+            <li><a href="/guides/stable-nodes/">稳定节点怎么看</a></li>
+            <li><a href="/guides/scientific-internet-guide/">科学上网入门</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="fh">客户端教程</p>
+          <ul>
+            <li><a href="/guides/lingdongyun-official/">灵动云官网与注册入口</a></li>
+            <li><a href="/guides/getting-started/">新手上手指南</a></li>
+            <li><a href="/guides/multi-device-clients/">多端客户端指南</a></li>
+            <li><a href="/guides/clash-nodes/">Clash 节点使用</a></li>
+            <li><a href="/guides/clash-airport/">Clash 订阅怎么选</a></li>
+            <li><a href="/guides/clashparty-airport/">Clash Party 配置</a></li>
+            <li><a href="/guides/">全部使用指南</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 {SITE.brand} · lingdongyun.site · 保留所有权利</p>
+      <p>本站为灵动云官方网站，页面内容仅代表官网本站信息。</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { background: var(--footer); color: #cfe6f5; padding: 56px 0 28px; font-size: 15px; }
+  .site-footer a:not(.btn) { color: #e0f2fe; }
+  .site-footer a:not(.btn):hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+
+  .footer-cta {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    padding: 28px 32px; border-radius: 20px; margin-bottom: 48px;
+    background: linear-gradient(120deg, rgba(2, 132, 199, 0.35), rgba(14, 165, 233, 0.12));
+    border: 1px solid rgba(125, 211, 252, 0.25);
+  }
+  .cta-title { font-size: 22px; font-weight: 800; color: #fff; }
+  .cta-text { margin-top: 6px; color: #bae6fd; font-size: 14.5px; }
+  .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-ghost { color: #fff; border-color: rgba(186, 230, 253, 0.45); background: transparent; }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); color: #fff; border-color: #fff; }
+
+  .footer-top { display: grid; grid-template-columns: 1.15fr 2.6fr; gap: 56px; padding-bottom: 40px; border-bottom: 1px solid rgba(186, 230, 253, 0.14); }
+  .f-brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; }
+  .f-brand:hover { text-decoration: none !important; }
+  .f-brand span { display: flex; flex-direction: column; line-height: 1.15; }
+  .f-brand strong { font-size: 20px; letter-spacing: .04em; color: #fff; }
+  .f-brand small { font-size: 10.5px; letter-spacing: .16em; color: #7dd3fc; font-weight: 700; margin-top: 3px; }
+  .footer-brand > p { margin-top: 16px; color: #a9cde3; font-size: 14.5px; line-height: 1.85; }
+  .f-facts { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 8px; font-size: 14px; }
+  .f-facts li { display: flex; gap: 12px; align-items: baseline; }
+  .f-facts span { color: #7fb0cc; min-width: 4.5em; }
+
+  .footer-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .footer-nav .fh { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid rgba(56, 189, 248, 0.5); display: inline-block; }
+  .footer-nav ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
+  .footer-nav a { display: inline-block; padding: 5px 0; font-size: 14.5px; color: #cfe6f5 !important; }
+  .footer-nav a:hover { color: #fff !important; }
+
+  .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-top: 22px; font-size: 13.5px; color: #8fb8d1; }
+
+  @media (max-width: 1024px) {
+    .footer-top { grid-template-columns: 1fr; gap: 36px; }
+  }
+  @media (max-width: 760px) {
+    .footer-nav { grid-template-columns: 1fr 1fr; gap: 28px 20px; }
+    .footer-cta { padding: 24px 20px; text-align: center; justify-content: center; }
+    .cta-actions { width: 100%; }
+    .cta-actions .btn { flex: 1 1 140px; }
+    .footer-bottom { flex-direction: column; text-align: center; align-items: center; }
+  }
+</style>

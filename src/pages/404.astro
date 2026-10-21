@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="页面不存在｜灵动云官网" description="你访问的页面不存在或已移动。可以返回灵动云官网首页、查看套餐或浏览使用指南。" path="/404/" noindex>
+  <section class="nf container">
+    <p class="code">404</p>
+    <h1>页面不存在</h1>
+    <p class="msg">你访问的地址可能输入有误，或页面已被移动。</p>
+    <div class="acts">
+      <a class="btn btn-primary" href="/">返回首页</a>
+      <a class="btn btn-outline" href="/#pricing">查看套餐</a>
+      <a class="btn btn-outline" href="/guides/">使用指南</a>
+      <a class="btn btn-outline" href="/sitemap/">网站地图</a>
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { text-align: center; padding: 96px var(--gutter) 120px; }
+  .code { font-size: clamp(72px, 14vw, 120px); font-weight: 800; color: var(--primary); line-height: 1; background: linear-gradient(135deg, #0284c7, #0077b6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  h1 { font-size: 28px; margin-top: 16px; }
+  .msg { color: var(--muted); margin-top: 10px; }
+  .acts { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 32px; }
+</style>

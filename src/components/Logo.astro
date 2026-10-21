@@ -1,0 +1,23 @@
+---
+// 灵动云品牌标志（静态）：白色流星五角星 + 海蓝渐变圆角方块
+interface Props { size?: number; dark?: boolean }
+const { size = 36, dark = false } = Astro.props;
+const id = dark ? 'lgd' : 'lgl';
+---
+<svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id={`${id}-g`} x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color={dark ? '#38BDF8' : '#0EA5E9'} />
+      <stop offset="1" stop-color={dark ? '#0284C7' : '#0369A1'} />
+    </linearGradient>
+    <mask id={`${id}-m`}>
+      <rect width="48" height="48" fill="#fff" />
+      <rect x="-4" y="29.1" width="60" height="2.4" fill="#000" transform="rotate(-22 24 30.3)" />
+    </mask>
+  </defs>
+  <rect width="48" height="48" rx="13" fill={`url(#${id}-g)`} />
+  <path d="M20.32 10.45 L26.47 19.08 L36.89 17.15 L30.58 25.66 L35.64 34.97 L25.60 31.60 L18.31 39.29 L18.40 28.70 L8.84 24.14 L18.94 20.96 Z" fill="#fff" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" mask={`url(#${id}-m)`} />
+  <path d="M8.6 36.6 L16.2 33.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".9" />
+  <path d="M33.6 15.2 L39.4 9.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
+  <circle cx="40.6" cy="15.6" r="1.25" fill="#fff" opacity=".85" />
+</svg>

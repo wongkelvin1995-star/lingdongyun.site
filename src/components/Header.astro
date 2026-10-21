@@ -1,0 +1,114 @@
+---
+import Logo from './Logo.astro';
+import { NAV, SITE } from '../data/site';
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : href.startsWith('/guides') ? path.startsWith('/guides') : false;
+---
+<header class="site-header" data-header>
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="灵动云官网首页">
+      <Logo size={38} />
+      <span class="brand-text">
+        <span class="brand-name">{SITE.brand}</span>
+        <span class="brand-en">{SITE.brandEn}</span>
+      </span>
+    </a>
+
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <ul>
+        {NAV.map((item) => (
+          <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ))}
+      </ul>
+      <a class="btn btn-primary btn-sm nav-cta-mobile" href={SITE.registerUrl} target="_blank" rel="noopener">注册 / 登录</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="btn btn-primary btn-sm header-cta" href={SITE.registerUrl} target="_blank" rel="noopener">注册 / 登录</a>
+      <button class="menu-toggle" type="button" aria-controls="main-nav" aria-expanded="false" aria-label="打开导航菜单" data-menu-toggle>
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const nav = document.getElementById('main-nav');
+  if (btn && header && nav) {
+    const setOpen = (open: boolean) => {
+      header.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? '关闭导航菜单' : '打开导航菜单');
+    };
+    btn.addEventListener('click', () => setOpen(!header.classList.contains('is-open')));
+    nav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && header.classList.contains('is-open')) { setOpen(false); btn.focus(); }
+    });
+    window.matchMedia('(min-width: 961px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid #e8f3fb;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    gap: 24px;
+  }
+  .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); flex-shrink: 0; }
+  .brand:hover { color: var(--text); }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .brand-name { font-size: 20px; font-weight: 800; letter-spacing: 0.04em; }
+  .brand-en { font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; color: var(--primary); margin-top: 3px; }
+
+  .main-nav ul { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+  .main-nav a:not(.btn) {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px;
+    color: #334155; font-size: 15.5px; font-weight: 500; border-radius: 999px;
+    transition: color .2s, background-color .2s;
+  }
+  .main-nav a:not(.btn):hover { color: var(--primary); background: var(--soft); }
+  .main-nav a[aria-current='page'] { color: var(--primary); font-weight: 700; }
+  .nav-cta-mobile { display: none; }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+
+  .menu-toggle {
+    display: none; width: 44px; height: 44px; border: 1px solid var(--border); background: #fff;
+    border-radius: 12px; cursor: pointer; padding: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  }
+  .menu-toggle .bar { width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: transform .2s, opacity .2s; }
+  .is-open .menu-toggle .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .is-open .menu-toggle .bar:nth-child(2) { opacity: 0; }
+  .is-open .menu-toggle .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  @media (max-width: 960px) {
+    .menu-toggle { display: inline-flex; }
+    .header-cta { display: none; }
+    .main-nav {
+      display: none; position: absolute; left: 0; right: 0; top: 72px;
+      background: #fff; border-bottom: 1px solid var(--border); box-shadow: 0 16px 30px rgba(2, 132, 199, 0.1);
+      padding: 8px var(--gutter) 20px;
+    }
+    .is-open .main-nav { display: block; }
+    .main-nav ul { flex-direction: column; gap: 2px; }
+    .main-nav a:not(.btn) { width: 100%; min-height: 48px; border-radius: 10px; font-size: 16px; }
+    .nav-cta-mobile { display: flex; width: 100%; margin-top: 12px; min-height: 48px; }
+  }
+  @media (max-width: 380px) {
+    .brand-name { font-size: 18px; }
+  }
+</style>

@@ -1,0 +1,43 @@
+# 灵动云官网
+
+> 灵动云官网：介绍灵动云月付、年付与一次性流量包套餐，提供机场选购方法与 Clash、Clash Party 客户端使用指南。
+
+- 品牌：灵动云（LINGDONG CLOUD）
+- 常见叫法：LINGDONG CLOUD、Lingdongyun、灵动云官网、灵动云机场、灵动云VPN
+- 官方域名：https://lingdongyun.site/
+- 注册与账户平台：https://varnexa.lingdongaff.com/#/?code=HHoxxHGa
+- 内容更新日期：2026-10-17
+
+## 套餐（人民币）
+
+- 灵动·拂风：¥20 / 月起，100GB / 月（月付套餐）
+- 灵动·驭浪：¥50 / 月起，300GB / 月（月付套餐）
+- 灵动·破晓：¥100 / 月起，700GB / 月（月付套餐）
+- 灵动·凌霄：¥180 / 月起，1.5TB / 月（月付套餐）
+- 灵动·穿云：¥99 / 年，70GB / 月（年付套餐）
+- 灵动·闲云：¥199 / 一次性，150GB 总流量（一次性流量包）
+- 灵动·惊云：¥499 / 一次性，400GB 总流量（一次性流量包）
+- 灵动·飞云：¥899 / 一次性，800GB 总流量（一次性流量包）
+
+说明：套餐信息以注册后台实际展示为准。年付套餐为每月 70GB；一次性流量包为总流量。
+
+## 使用指南
+
+- [灵动云官网是哪个？灵动云机场官方网址、注册入口与防仿冒说明](https://lingdongyun.site/guides/lingdongyun-official/)：灵动云官网是 lingdongyun.site。一文说清品牌叫法、官方注册入口、套餐概览和防仿冒方法。
+- [便宜机场怎么选？预算、流量与套餐的比较方法](https://lingdongyun.site/guides/cheap-airport-guide/)：看总支出和单位流量成本，而不是只看标价；按自己的月用量，在月付、年付与流量包之间做选择。
+- [安全机场如何判断？隐私、订阅链接与客户端来源](https://lingdongyun.site/guides/safe-airport-guide/)：安全是一组可以检查的习惯：理解信任边界，只用官方渠道的客户端，保护好订阅链接中的令牌。
+- [2026 机场推荐选购指南：如何找到适合自己的服务](https://lingdongyun.site/guides/airport-recommendation-2026/)：不靠排行榜，按需求、预算、线路信息与实际验证四步，找到适合自己的机场服务。
+- [科学上网与翻墙出海入门：理解全球加速的基本概念](https://lingdongyun.site/guides/scientific-internet-guide/)：一文理清机场、节点、订阅和客户端的关系，以及全球加速能做什么、不能保证什么。
+- [稳定节点怎么看？选择魔法梯子前需要了解的指标](https://lingdongyun.site/guides/stable-nodes/)：稳定不是一次测速的结果，而是延迟波动、连接成功率与晚高峰表现的长期观察。
+- [Clash 节点使用指南：订阅导入、更新与常见排错](https://lingdongyun.site/guides/clash-nodes/)：导入前先查格式，导入后会更新、会选节点，出问题按顺序排查——Clash 节点日常操作一篇看懂。
+- [Clash 机场订阅怎么选？协议、配置格式与套餐需求](https://lingdongyun.site/guides/clash-airport/)：购买前确认订阅格式、协议支持与套餐流量三件事，避免买完才发现用不了 Clash。
+- [Clash Party 机场配置指南：从订阅准备到日常维护](https://lingdongyun.site/guides/clashparty-airport/)：从官方下载 Clash Party，准备好兼容的订阅，导入后定期更新，并保护好订阅令牌。
+- [灵动云套餐怎么选？月付、年付与一次性流量包按需选购指南](https://lingdongyun.site/guides/plan-selection/)：8 档套餐一次看懂：先判断计费方式，再按月用量选档位，最后核对后台的实际说明。
+- [多端客户端指南：电脑与手机如何选择 Clash、Clash Party 与小火箭](https://lingdongyun.site/guides/multi-device-clients/)：电脑用 Clash Party，安卓可选 Clash Meta for Android，苹果设备常用小火箭——先确认订阅格式，再按设备选客户端。
+- [灵动云新手上手指南：从注册、选套餐到首次连接](https://lingdongyun.site/guides/getting-started/)：六步完成从注册到首次连接：注册、选套餐、取订阅、装客户端、导入选节点、确认连接。
+
+## 其他页面
+
+- [首页](https://lingdongyun.site/)
+- [使用指南列表](https://lingdongyun.site/guides/)
+- [网站地图](https://lingdongyun.site/sitemap/)

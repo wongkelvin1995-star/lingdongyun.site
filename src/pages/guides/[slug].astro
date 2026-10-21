@@ -1,0 +1,149 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Icon from '../../components/Icon.astro';
+import { SITE } from '../../data/site';
+
+export async function getStaticPaths() {
+  const all = await getCollection('guides');
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, all } }));
+}
+
+const { entry, all } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const path = `/guides/${entry.id}/`;
+const url = `${SITE.url}${path}`;
+const related = d.related
+  .map((slug) => all.find((g) => g.id === slug))
+  .filter((g): g is NonNullable<typeof g> => Boolean(g) && g!.id !== entry.id);
+
+const fmt = (s: string) => {
+  const [y, m, day] = s.split('-');
+  return `${y} 年 ${Number(m)} 月 ${Number(day)} 日`;
+};
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: d.title,
+    description: d.description,
+    inLanguage: 'zh-CN',
+    datePublished: d.published,
+    dateModified: d.updated,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    url,
+    image: `${SITE.url}${SITE.ogImage}`,
+    keywords: d.keywords.join(', '),
+    articleSection: d.category,
+    author: { '@type': 'Organization', name: SITE.brand, url: `${SITE.url}/` },
+    publisher: { '@type': 'Organization', name: SITE.brand, url: `${SITE.url}/`, logo: { '@type': 'ImageObject', url: `${SITE.url}/logo-512.png` } },
+    citation: d.sources.map((s) => s.url),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首页', item: `${SITE.url}/` },
+      { '@type': 'ListItem', position: 2, name: '使用指南', item: `${SITE.url}/guides/` },
+      { '@type': 'ListItem', position: 3, name: d.title, item: url },
+    ],
+  },
+];
+---
+<Base title={d.seoTitle} description={d.description} path={path} ogType="article" jsonLd={jsonLd} article={{ published: d.published, updated: d.updated }}>
+  <div class="article-hero">
+    <div class="container narrow">
+      <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '使用指南', href: '/guides/' }, { name: d.title }]} />
+      <span class="a-cat">{d.category}</span>
+      <h1>{d.title}</h1>
+      <p class="a-meta">
+        <span>作者：{SITE.brand}</span>
+        <span>发布：<time datetime={d.published}>{fmt(d.published)}</time></span>
+        <span>更新：<time datetime={d.updated}>{fmt(d.updated)}</time></span>
+      </p>
+    </div>
+  </div>
+
+  <div class="container narrow">
+    <article class="prose" data-article-body>
+      <Content />
+    </article>
+
+    <section class="sources" aria-labelledby="src-title">
+      <h2 id="src-title">参考来源</h2>
+      <ul>
+        {d.sources.map((s) => <li><a href={s.url} target="_blank" rel="noopener">{s.title}</a></li>)}
+      </ul>
+      <p class="src-note">本文基于上述公开资料与一般使用经验整理，不包含实测数据；客户端界面可能随版本变化，请以官方文档为准。</p>
+    </section>
+
+    <section class="related" aria-labelledby="rel-title">
+      <h2 id="rel-title">相关阅读</h2>
+      <ul>
+        {related.map((g) => (
+          <li class="card">
+            <span class="r-cat">{g.data.category}</span>
+            <a href={`/guides/${g.id}/`}>{g.data.title}</a>
+            <p>{g.data.excerpt}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <nav class="a-nav" aria-label="文章底部导航">
+      <a class="btn btn-outline" href="/guides/"><Icon name="book" size={18} />返回文章列表</a>
+      <a class="btn btn-outline" href="/">返回首页</a>
+      <a class="btn btn-primary" href="/#pricing">查看套餐<Icon name="arrow" size={18} /></a>
+    </nav>
+  </div>
+</Base>
+
+<style>
+  .narrow { max-width: calc(800px + var(--gutter) * 2); }
+  .article-hero { background: linear-gradient(180deg, var(--soft), #fff); padding: 36px 0 32px; border-bottom: 1px solid #e8f3fb; }
+  .a-cat { display: inline-block; margin-top: 24px; font-size: 13px; font-weight: 700; color: var(--primary); background: #fff; border: 1px solid var(--border); padding: 3px 12px; border-radius: 999px; }
+  .article-hero h1 { font-size: clamp(26px, 3.6vw, 38px); margin-top: 14px; line-height: 1.35; }
+  .a-meta { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 16px; color: var(--muted); font-size: 14px; }
+
+  .prose { padding: 40px 0 8px; font-size: 17px; line-height: 1.9; color: #1e293b; overflow-wrap: anywhere; }
+  .prose :global(p) { margin: 0 0 1.1em; }
+  .prose :global(h2) { font-size: 24px; margin: 1.9em 0 0.7em; padding-left: 14px; border-left: 4px solid var(--primary); line-height: 1.4; }
+  .prose :global(h3) { font-size: 19px; margin: 1.5em 0 0.5em; }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.4em; margin: 0 0 1.2em; }
+  .prose :global(li) { margin: 0.35em 0; }
+  .prose :global(a) { color: var(--primary); text-decoration: underline; text-decoration-color: #9fd2ef; text-underline-offset: 3px; }
+  .prose :global(a:hover) { text-decoration-color: var(--primary); }
+  .prose :global(strong) { color: var(--text); }
+  .prose :global(blockquote) { margin: 0 0 1.3em; padding: 16px 20px; background: var(--soft); border: 1px solid var(--border); border-radius: 12px; color: #1e3a52; }
+  .prose :global(blockquote p:last-child) { margin-bottom: 0; }
+  .prose :global(table) { width: 100%; border-collapse: collapse; margin: 0 0 1.3em; font-size: 15px; display: block; overflow-x: auto; }
+  .prose :global(th), .prose :global(td) { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  .prose :global(th) { background: var(--soft); white-space: nowrap; }
+  .prose :global(.summary) { background: var(--soft); }
+
+  .sources { margin-top: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 14px; }
+  .sources h2, .related h2 { font-size: 20px; }
+  .sources ul { margin: 12px 0 0; padding-left: 1.2em; }
+  .sources li { margin: 6px 0; overflow-wrap: anywhere; }
+  .src-note { margin-top: 12px; font-size: 14px; color: var(--muted); }
+
+  .related { margin-top: 48px; }
+  .related ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .related li { padding: 20px; display: flex; flex-direction: column; }
+  .r-cat { font-size: 12.5px; font-weight: 700; color: var(--primary); }
+  .related a { color: var(--text); font-weight: 700; margin-top: 8px; line-height: 1.5; }
+  .related a:hover { color: var(--primary); }
+  .related p { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+  .a-nav { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 48px 0 80px; padding-top: 32px; border-top: 1px solid var(--border); }
+
+  @media (max-width: 760px) {
+    .related ul { grid-template-columns: 1fr; }
+    .prose { font-size: 16.5px; }
+    .prose :global(h2) { font-size: 21px; }
+    .a-nav .btn { flex: 1 1 100%; }
+  }
+</style>

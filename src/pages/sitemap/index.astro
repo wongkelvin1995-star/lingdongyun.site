@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { SITE } from '../../data/site';
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
+const jsonLd = [{
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: '首页', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: '网站地图', item: `${SITE.url}/sitemap/` },
+  ],
+}];
+---
+<Base title="网站地图｜灵动云官网" description="灵动云官网全部页面索引：首页各板块、使用指南列表与 8 篇机场选购及 Clash 客户端文章。" path="/sitemap/" jsonLd={jsonLd}>
+  <div class="sm container">
+    <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '网站地图' }]} />
+    <h1>网站地图</h1>
+    <div class="cols">
+      <section>
+        <h2>首页</h2>
+        <ul>
+          <li><a href="/">灵动云官网首页</a></li>
+          <li><a href="/#features">服务优势</a></li>
+          <li><a href="/#pricing">套餐价格</a></li>
+          <li><a href="/#guides">文章入口</a></li>
+          <li><a href="/#faq">常见问题</a></li>
+        </ul>
+      </section>
+      <section>
+        <h2><a href="/guides/">使用指南</a></h2>
+        <ul>
+          {guides.map((g) => <li><a href={`/guides/${g.id}/`}>{g.data.title}</a></li>)}
+        </ul>
+      </section>
+    </div>
+  </div>
+</Base>
+<style>
+  .sm { padding-top: 36px; padding-bottom: 96px; }
+  h1 { font-size: clamp(28px, 4vw, 38px); margin-top: 20px; }
+  .cols { display: grid; grid-template-columns: 1fr 2fr; gap: 40px; margin-top: 32px; }
+  section { border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; }
+  h2 { font-size: 20px; }
+  h2 a { color: var(--text); }
+  ul { margin: 14px 0 0; padding-left: 1.2em; }
+  li { margin: 8px 0; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; gap: 20px; } section { padding: 20px; } }
+</style>
