@@ -4,36 +4,48 @@ import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import Icon from '../../components/Icon.astro';
 import { SITE, readMinutes } from '../../data/site';
+import { WEBSITE_REF, breadcrumbs } from '../../data/jsonld';
 
 const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
-const title = '使用指南：机场选购与 Clash 客户端知识｜灵动云官网';
-const description = '灵动云使用指南：便宜机场、安全机场、2026 机场推荐的判断方法，稳定节点观察指标，以及 Clash、Clash Party 订阅导入与维护。';
+const title = '灵动云官网资料：官方站点说明、套餐价格与服务说明';
+const description =
+  '灵动云官网资料目录：官方站点说明讲清五个官方域名的分工与辨认方法，套餐价格与服务说明列出 9 档套餐的价格、计费规则和线路节点；客户端教程、选购建议、问题排查与新手步骤在对应的官方站点。';
+
+// 其他内容所在的官方站点（只链接各站首页）
+const elsewhere = [
+  { name: '灵动云使用指南', domain: 'lingdongyun.website', url: 'https://lingdongyun.website/', text: 'Clash、Clash Party、小火箭、v2rayN 等客户端的订阅导入与节点切换步骤。', icon: 'book' },
+  { name: '灵动云套餐选择', domain: 'lingdongyun.best', url: 'https://lingdongyun.best/', text: '不知道买哪一档时，先估算每月用量，再对照 9 档套餐的选购建议。', icon: 'layers' },
+  { name: '灵动云帮助中心', domain: 'lingdongyun.sbs', url: 'https://lingdongyun.sbs/', text: '连不上、订阅更新失败或速度变慢时的排查步骤，以及在线客服入口。', icon: 'chat' },
+  { name: '灵动云新手入门', domain: 'lingdongyun.lol', url: 'https://lingdongyun.lol/', text: '第一次使用时，按四步完成注册、选套餐、导入订阅和连接测试。', icon: 'compass' },
+] as const;
 
 const jsonLd = [
   {
-    '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '灵动云使用指南',
+    '@id': `${SITE.url}/guides/#page`,
+    name: '灵动云官网资料',
+    description,
     url: `${SITE.url}/guides/`,
     inLanguage: 'zh-CN',
-    hasPart: guides.map((g) => ({ '@type': 'BlogPosting', headline: g.data.title, url: `${SITE.url}/guides/${g.id}/` })),
+    isPartOf: WEBSITE_REF,
+    hasPart: guides.map((g) => ({ '@id': `${SITE.url}/guides/${g.id}/#article` })),
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: '首页', item: `${SITE.url}/` },
-      { '@type': 'ListItem', position: 2, name: '使用指南', item: `${SITE.url}/guides/` },
-    ],
-  },
+  breadcrumbs([
+    { name: '首页', path: '/' },
+    { name: '官网资料', path: '/guides/' },
+  ]),
 ];
 ---
 <Base title={title} description={description} path="/guides/" jsonLd={jsonLd}>
   <div class="list-hero">
+    <svg class="l-orbit" viewBox="0 0 560 300" aria-hidden="true" focusable="false">
+      <ellipse cx="300" cy="150" rx="250" ry="64" transform="rotate(-14 300 150)" />
+      <ellipse cx="300" cy="150" rx="170" ry="40" transform="rotate(-14 300 150)" />
+    </svg>
     <div class="container">
-      <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '使用指南' }]} />
-      <h1>使用指南</h1>
-      <p>机场选购与客户端知识：先讲判断方法，再讲具体操作。共 {guides.length} 篇。</p>
+      <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '官网资料' }]} />
+      <h1>灵动云官网资料</h1>
+      <p>官网保留两份参考资料：一份说明五个官方站点各自做什么，一份列出 9 档套餐的价格和服务规则。客户端教程、选购建议、问题排查和新手步骤，分别放在对应的官方站点。</p>
     </div>
   </div>
   <div class="container list-body">
@@ -50,6 +62,25 @@ const jsonLd = [
         </li>
       ))}
     </ul>
+
+    <section class="elsewhere" aria-labelledby="elsewhere-title">
+      <h2 id="elsewhere-title">更多内容在官方站点</h2>
+      <p class="el-lead">下面四类内容不在官网，而是由专门的官方站点负责：</p>
+      <ul class="el-list">
+        {elsewhere.map((s) => (
+          <li>
+            <span class="el-icon"><Icon name={s.icon} size={20} /></span>
+            <span class="el-text">
+              <a href={s.url}>{s.name}</a>
+              <small>{s.domain}</small>
+              <span>{s.text}</span>
+            </span>
+            <span class="el-go" aria-hidden="true"><Icon name="external" size={18} /></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
     <div class="list-cta">
       <a class="btn btn-outline" href="/">返回首页</a>
       <a class="btn btn-primary" href="/#pricing">查看套餐<Icon name="arrow" size={18} /></a>
@@ -57,21 +88,66 @@ const jsonLd = [
   </div>
 </Base>
 <style>
-  .list-hero { background: linear-gradient(180deg, var(--soft), #fff); padding: 36px 0 40px; border-bottom: 1px solid #e8f3fb; }
-  .list-hero h1 { font-size: clamp(30px, 4vw, 42px); margin-top: 20px; }
-  .list-hero p { color: var(--muted); margin-top: 10px; font-size: 17px; }
-  .list-body { padding: 48px var(--gutter) 88px; }
-  .g-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .g-list li { position: relative; padding: 28px; display: flex; flex-direction: column; transition: transform .25s, box-shadow .25s, border-color .25s; }
-  .g-list li:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: #bfe0f5; }
-  .g-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
-  .g-cat { font-weight: 700; color: var(--primary); background: var(--soft); padding: 3px 10px; border-radius: 6px; }
-  .g-list h2 { font-size: 20px; margin-top: 14px; line-height: 1.45; }
+  .list-hero {
+    position: relative; overflow: hidden; isolation: isolate; padding: 32px 0 56px; border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(640px 320px at 12% -20%, rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0) 70%),
+      linear-gradient(180deg, #08060f 0%, var(--bg) 100%);
+  }
+  .l-orbit { position: absolute; right: -80px; top: -50px; width: 600px; height: auto; z-index: -1; pointer-events: none; }
+  .l-orbit ellipse { fill: none; stroke: var(--accent-hi); stroke-width: 1; stroke-opacity: 0.14; }
+  .l-orbit ellipse:first-child { stroke-dasharray: 2 8; stroke-linecap: round; stroke-opacity: 0.22; }
+  .list-hero h1 { margin-top: 24px; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.15; letter-spacing: 0.02em; }
+  .list-hero p { max-width: 44em; margin-top: 16px; font-size: 17px; line-height: 1.85; color: var(--muted); }
+  .list-body { padding: 56px var(--gutter) 104px; }
+
+  .g-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .g-list li { position: relative; display: flex; flex-direction: column; padding: 32px; transition: border-color .25s var(--ease); }
+  .g-list li:hover { border-color: var(--accent-line); }
+  .g-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .g-cat { font-weight: 500; letter-spacing: 0.04em; color: var(--accent-hi); border: 1px solid var(--accent-line); background: rgba(139, 92, 246, 0.08); padding: 2px 10px; border-radius: var(--r-xs); }
+  .g-list h2 { margin-top: 20px; font-size: 21px; line-height: 1.45; }
   .g-list h2 a { color: var(--text); }
-  .g-list h2 a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
-  .g-list h2 a:hover { color: var(--primary); }
-  .g-list p { color: var(--muted); margin-top: 10px; flex: 1; }
-  .g-more { display: inline-flex; align-items: center; gap: 4px; margin-top: 16px; font-size: 14px; font-weight: 600; color: var(--primary); }
-  .list-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 48px; }
-  @media (max-width: 760px) { .g-list { grid-template-columns: 1fr; } .g-list li { padding: 22px; } }
+  .g-list h2 a::after { content: ''; position: absolute; inset: 0; border-radius: var(--r); }
+  .g-list h2 a:hover { color: #fff; }
+  .g-list p { flex: 1; margin-top: 12px; font-size: 15px; line-height: 1.8; color: var(--muted); }
+  .g-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 20px; font-size: 14px; font-weight: 600; color: var(--accent-hi); }
+  .g-more :global(svg) { transition: transform .25s var(--ease); }
+  .g-list li:hover .g-more :global(svg) { transform: translateX(3px); }
+
+  /* 其他官方站点：与首页名录同一种行样式 */
+  .elsewhere { margin-top: 72px; }
+  .elsewhere h2 { font-size: clamp(22px, 2.6vw, 30px); }
+  .el-lead { margin-top: 10px; color: var(--muted); }
+  .el-list {
+    list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: linear-gradient(180deg, rgba(22, 15, 43, 0.6), rgba(17, 12, 32, 0.6));
+  }
+  .el-list li { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 20px; gap: 18px; align-items: start; padding: 24px 28px; transition: background-color .25s var(--ease); }
+  .el-list li:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  .el-list li:nth-child(even) { border-left: 1px solid var(--line); }
+  .el-list li:hover { background: rgba(139, 92, 246, 0.06); }
+  .el-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--r-sm); border: 1px solid var(--line-2); background: rgba(139, 92, 246, 0.06); color: var(--accent-hi); }
+  .el-text { display: flex; flex-direction: column; min-width: 0; }
+  .el-text a { font-weight: 600; color: var(--text); }
+  .el-text a::after { content: ''; position: absolute; inset: 0; }
+  .el-text a:hover { color: #fff; }
+  .el-text small { font-size: 13px; font-weight: 500; letter-spacing: 0.02em; color: var(--accent-hi); }
+  .el-text span { margin-top: 8px; font-size: 14.5px; line-height: 1.7; color: var(--muted); }
+  .el-go { padding-top: 2px; color: var(--faint); transition: color .25s var(--ease), transform .25s var(--ease); }
+  .el-list li:hover .el-go { color: var(--accent-hi); transform: translate(2px, -2px); }
+
+  .list-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--line); }
+  @media (max-width: 760px) {
+    .list-hero { padding: 20px 0 40px; }
+    .l-orbit { width: 380px; right: -170px; top: -40px; }
+    .list-body { padding-top: 40px; padding-bottom: 72px; }
+    .g-list { grid-template-columns: 1fr; }
+    .g-list li { padding: 24px 20px; }
+    .el-list { grid-template-columns: 1fr; }
+    .el-list li { padding: 20px 16px; gap: 14px; }
+    .el-list li:nth-child(even) { border-left: 0; }
+    .el-list li + li { border-top: 1px solid var(--line); }
+    .list-cta .btn { flex: 1 1 100%; }
+  }
 </style>

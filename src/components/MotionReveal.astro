@@ -1,0 +1,20 @@
+---
+// 出场动态（五站共用，由 tools/motion.py 生成，勿手改）
+---
+<script is:inline>(function(){var d=document.documentElement;if(!d.classList.contains('ldy-motion'))return;try{
+var C={"e":"cubic-bezier(.16,1,.3,1)","p":{"up":{"f":{"opacity":0,"translate":"0 22px"},"d":1000},"visual":{"f":{"opacity":0,"scale":".94"},"d":1500},"side":{"f":{"opacity":0,"translate":"40px 0"},"d":900},"card":{"f":{"opacity":0,"translate":"0 18px","scale":".985"},"d":900}},"g":[[".section-head","up",0],[".plan-filter","up",0],[".rail-bar","up",0],[".plan-grid > .plan","side",80],[".plan-custom","card",0],[".plan-foot","up",0],[".about-copy","up",0],[".about-facts","card",0],[".family-head","up",0],[".family-item","up",60],[".family-more","up",0],[".faq-item","up",50],[".plan-table","card",0],[".a-faq","up",0],[".related li","up",60],[".a-nav","up",0],[".list-body > *","up",70],[".list-cta","card",0],[".cols > section","up",80],[".footer-cta","card",0]]},tr=window.CSS&&CSS.supports&&CSS.supports('translate','1px')&&CSS.supports('scale','1')&&CSS.supports('rotate','1deg');
+function kf(f){if(tr)return f;var o={},t='';for(var k in f){if(k==='translate')t+=' translate('+f[k].split(' ').join(',')+')';else if(k==='scale')t+=' scale('+f[k]+')';else if(k==='rotate')t+=' rotate('+f[k]+')';else o[k]=f[k]}if(t)o.transform=t.trim();return o}
+var items=[],sel=new Set();C.g.forEach(function(g){try{document.querySelectorAll(g[0]).forEach(function(el){if(!sel.has(el)){sel.add(el);items.push({el:el,p:C.p[g[1]],st:g[2]})}})}catch(e){}});
+function anc(el){for(var a=el.parentElement;a;a=a.parentElement)if(sel.has(a))return true;return false}
+function play(it,delay){var el=it.el;el.classList.add('ldy-in');try{var f=kf(it.p.f);f.offset=0;el.animate([f],{duration:it.p.d,delay:delay,easing:C.e,fill:'backwards'})}catch(e){}}
+var io=new IntersectionObserver(function(es){var b=es.filter(function(e){return e.isIntersecting}).map(function(e){return e.target});
+b.sort(function(a,c){return a.compareDocumentPosition(c)&4?-1:1});var t=0;b.forEach(function(el){io.unobserve(el);var it=el.__ldy;play(it,Math.min(t,640));t+=it.st})},
+{rootMargin:'0px 0px -6% 0px',threshold:0.01});
+var vh=innerHeight,vw=innerWidth,first=[];items.forEach(function(it){var el=it.el;el.__ldy=it;if(anc(el)){el.classList.add('ldy-in');return}
+var r=el.getBoundingClientRect();if(!r.width&&!r.height){io.observe(el);return}
+if(r.top<vh&&r.bottom>0&&r.left<vw&&r.right>0)first.push(it);else io.observe(el)});
+function go(){var t=0;first.forEach(function(it){play(it,Math.min(t,700));t+=it.st})}
+if(d.classList.contains('ldy-intro')&&d.getAttribute('data-ldy-intro')!=='done'){var on=false;var run=function(){if(on)return;on=true;go()};
+document.addEventListener('ldy:intro-end',run,{once:true});setTimeout(run,3000)}else requestAnimationFrame(go);
+addEventListener('beforeprint',function(){items.forEach(function(it){it.el.classList.add('ldy-in')})});
+d.classList.add('ldy-rv-ok')}catch(e){d.classList.remove('ldy-motion')}})();</script>

@@ -2,17 +2,13 @@
 import Logo from './Logo.astro';
 import { NAV, SITE } from '../data/site';
 const path = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === '/' ? path === '/' : href.startsWith('/guides') ? path.startsWith('/guides') : false;
+// 只有指向当前页面本身的站内链接才标记为当前页（锚点和其他官方站点不标记）
+const isActive = (href: string) => href.startsWith('/') && !href.includes('#') && href === path;
 ---
 <header class="site-header" data-header>
   <div class="container header-inner">
     <a class="brand" href="/" aria-label="灵动云官网首页">
-      <Logo size={38} />
-      <span class="brand-text">
-        <span class="brand-name">{SITE.brand}</span>
-        <span class="brand-en">{SITE.brandEn}</span>
-      </span>
+      <Logo size={32} />
     </a>
 
     <nav class="main-nav" id="main-nav" aria-label="主导航">
@@ -57,58 +53,67 @@ const isActive = (href: string) =>
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: saturate(180%) blur(12px);
-    -webkit-backdrop-filter: saturate(180%) blur(12px);
-    border-bottom: 1px solid #e8f3fb;
+    background: rgba(7, 5, 15, 0.72);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid var(--line);
   }
   .header-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 72px;
+    height: var(--header-h);
     gap: 24px;
   }
-  .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); flex-shrink: 0; }
+  .brand { display: inline-flex; align-items: center; min-height: 44px; flex-shrink: 0; color: var(--text); }
   .brand:hover { color: var(--text); }
-  .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-  .brand-name { font-size: 20px; font-weight: 800; letter-spacing: 0.04em; }
-  .brand-en { font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em; color: var(--primary); margin-top: 3px; }
 
-  .main-nav ul { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+  .main-nav ul { display: flex; gap: 2px; list-style: none; margin: 0; padding: 0; }
   .main-nav a:not(.btn) {
+    position: relative;
     display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px;
-    color: #334155; font-size: 15.5px; font-weight: 500; border-radius: 999px;
-    transition: color .2s, background-color .2s;
+    color: var(--muted); font-size: 15px; font-weight: 500; border-radius: var(--r-sm);
+    transition: color .2s var(--ease), background-color .2s var(--ease);
   }
-  .main-nav a:not(.btn):hover { color: var(--primary); background: var(--soft); }
-  .main-nav a[aria-current='page'] { color: var(--primary); font-weight: 700; }
+  .main-nav a:not(.btn):hover { color: var(--text); background: rgba(167, 139, 250, 0.06); }
+  .main-nav a[aria-current='page'] { color: var(--text); }
+  /* 当前页：文字下方一个发光小点 */
+  .main-nav a[aria-current='page']::after {
+    content: ''; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+    background: var(--accent-hi); box-shadow: 0 0 8px 1px rgba(196, 181, 253, 0.8);
+  }
   .nav-cta-mobile { display: none; }
   .header-actions { display: flex; align-items: center; gap: 8px; }
 
   .menu-toggle {
-    display: none; width: 44px; height: 44px; border: 1px solid var(--border); background: #fff;
-    border-radius: 12px; cursor: pointer; padding: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    display: none; width: 44px; height: 44px; border: 1px solid var(--line-2); background: transparent;
+    border-radius: var(--r-sm); cursor: pointer; padding: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   }
-  .menu-toggle .bar { width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: transform .2s, opacity .2s; }
-  .is-open .menu-toggle .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .menu-toggle .bar { width: 18px; height: 1.5px; background: var(--text); border-radius: 2px; transition: transform .2s var(--ease), opacity .2s; }
+  .is-open .menu-toggle .bar:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
   .is-open .menu-toggle .bar:nth-child(2) { opacity: 0; }
-  .is-open .menu-toggle .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .is-open .menu-toggle .bar:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
 
+  @media (min-width: 961px) and (max-width: 1180px) {
+    .header-inner { gap: 12px; }
+    .main-nav a:not(.btn) { padding: 0 10px; font-size: 14.5px; }
+  }
   @media (max-width: 960px) {
     .menu-toggle { display: inline-flex; }
     .header-cta { display: none; }
     .main-nav {
-      display: none; position: absolute; left: 0; right: 0; top: 72px;
-      background: #fff; border-bottom: 1px solid var(--border); box-shadow: 0 16px 30px rgba(2, 132, 199, 0.1);
+      display: none; position: absolute; left: 0; right: 0; top: var(--header-h);
+      /* 必须是不透明色：半透明背景在粘性页头的合成层里会透出下方正文 */
+      background: var(--bg-2); border-bottom: 1px solid var(--line);
+      box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.7);
       padding: 8px var(--gutter) 20px;
     }
     .is-open .main-nav { display: block; }
-    .main-nav ul { flex-direction: column; gap: 2px; }
-    .main-nav a:not(.btn) { width: 100%; min-height: 48px; border-radius: 10px; font-size: 16px; }
-    .nav-cta-mobile { display: flex; width: 100%; margin-top: 12px; min-height: 48px; }
-  }
-  @media (max-width: 380px) {
-    .brand-name { font-size: 18px; }
+    .main-nav ul { flex-direction: column; gap: 0; }
+    .main-nav li + li { border-top: 1px solid var(--line); }
+    .main-nav a:not(.btn) { width: 100%; min-height: 52px; padding: 0 4px; border-radius: 0; font-size: 16px; color: var(--text-2); }
+    .main-nav a:not(.btn):hover { background: transparent; color: #fff; }
+    .main-nav a[aria-current='page']::after { left: auto; right: 8px; bottom: 50%; margin: 0 0 -2px; }
+    .nav-cta-mobile { display: flex; width: 100%; margin-top: 16px; min-height: 48px; }
   }
 </style>

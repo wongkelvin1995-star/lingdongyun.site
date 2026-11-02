@@ -1,0 +1,308 @@
+---
+// 首页两处紫焰（标题「灵动云官网」和 Hero 右侧 logo 徽标）共用的火焰动画。
+// 放在 Hero 外面（页面里 FlameTitle / HeroLogo 之后），避免脚本文字混进标题。
+---
+<script is:inline>
+  /* 火焰 = 一排火舌（先画在低分辨率画布上再放大，边缘自然柔和）+ 火舌尖飘出的火苗和火星。
+     两块火焰画布都在文字 / 球体后面，不遮挡内容；只在出现在屏幕上时播放；手机 30 帧/秒。
+     没有 html.ldy-motion（抓取程序、系统开了「减少动态效果」）时只画一帧静态火焰。 */
+  (function () {
+    var d = document.documentElement;
+    var animate = d.classList.contains('ldy-motion');
+    var mobile = Math.min(innerWidth, innerHeight) < 600;
+    // 火焰本身是柔和的光，画布不需要满分辨率（由浏览器放大显示）：每个 CSS 像素电脑画 1 个点、手机画 0.75 个点；
+    // 火舌的外焰再画在 1/4 分辨率的小画布上放大，边缘自然柔和。省电。
+    var RES = mobile ? 0.75 : 1, BODY = 0.25;
+    var minDt = mobile ? 1 / 31 : 0;
+    var D2R = Math.PI / 180;
+    var BODY_STOPS = [0, 'rgba(206,170,255,.9)', 0.3, 'rgba(160,100,248,.72)', 0.68, 'rgba(118,48,226,.3)', 1, 'rgba(96,24,190,0)'];
+    var CORE_STOPS = [0, 'rgba(255,255,255,.95)', 0.32, 'rgba(242,230,255,.78)', 0.7, 'rgba(200,165,255,.24)', 1, 'rgba(180,130,250,0)'];
+
+    function sprite(r, g, b, soft) {
+      var s = document.createElement('canvas');
+      s.width = s.height = 64;
+      var c = s.getContext('2d'), gr = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',1)');
+      gr.addColorStop(soft ? 0.5 : 0.3, 'rgba(' + r + ',' + g + ',' + b + ',' + (soft ? 0.4 : 0.6) + ')');
+      gr.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
+      c.fillStyle = gr;
+      c.fillRect(0, 0, 64, 64);
+      return s;
+    }
+    var WISP = sprite(190, 140, 255, true), EMBER = sprite(255, 238, 255), GLOW = sprite(124, 58, 237, true);
+
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    // 一条火舌：底部中心 (bx, by)、朝向 (ux, uy)、高 h、宽 w（单位由所在的火焰决定）
+    function tongue(bx, by, ux, uy, h, w) {
+      return {
+        bx: bx, by: by, ux: ux, uy: uy, ang: Math.atan2(ux, -uy), h: h, w: w, cur: 0,
+        f1: rnd(5, 8), f2: rnd(9, 14), f3: rnd(1.6, 3), p1: rnd(0, 6.28), p2: rnd(0, 6.28), p3: rnd(0, 6.28)
+      };
+    }
+
+    function make(root, fx, cv, o) {
+      var ctx = cv && cv.getContext && cv.getContext('2d');
+      var body = document.createElement('canvas');
+      var bctx = body.getContext && body.getContext('2d');
+      if (!ctx || !bctx) return null;
+      var F = {
+        root: root, fx: fx, cv: cv, ctx: ctx, body: body, bctx: bctx,
+        T: [], parts: [], S: 1, OX: 0, OY: 0, clock: 0, on: true,
+        heat: animate ? 0 : 1, igniteAt: Infinity, burst: false, o: o
+      };
+      F.size = function () {
+        var W = Math.max(1, fx.offsetWidth), H = Math.max(1, fx.offsetHeight);
+        cv.width = Math.max(1, Math.round(W * RES));
+        cv.height = Math.max(1, Math.round(H * RES));
+        body.width = Math.max(1, Math.round(W * BODY));
+        body.height = Math.max(1, Math.round(H * BODY));
+        o.measure(F, W, H);
+      };
+      return F;
+    }
+
+    // 在画布 c 上画全部火舌；k = 这块画布每个 CSS 像素对应几个点
+    function drawTongues(F, c, k, wm, hm, stops, alpha) {
+      c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = alpha;
+      var sc = F.S * k;
+      for (var i = 0; i < F.T.length; i++) {
+        var t = F.T[i], h = t.cur * hm;
+        if (h < 1) continue;
+        var w = t.w * wm * (0.8 + 0.2 * t.cur / t.h);
+        var sway = (Math.sin(F.clock * t.f3 + t.p3) * 0.45 + Math.sin(F.clock * t.f2 * 0.6 + t.p2) * 0.2) * w;
+        var cs = Math.cos(t.ang) * sc, sn = Math.sin(t.ang) * sc;
+        c.setTransform(cs, sn, -sn, cs, (F.OX + t.bx * F.S) * k, (F.OY + t.by * F.S) * k);
+        var g = c.createLinearGradient(0, 0, sway, -h);
+        for (var j = 0; j < stops.length; j += 2) g.addColorStop(stops[j], stops[j + 1]);
+        c.fillStyle = g;
+        c.beginPath();
+        c.moveTo(-w / 2, 0);
+        c.bezierCurveTo(-w / 2, -h * 0.38, sway * 0.45 - w * 0.16, -h * 0.72, sway, -h);
+        c.bezierCurveTo(sway * 0.45 + w * 0.16, -h * 0.72, w / 2, -h * 0.38, w / 2, 0);
+        c.quadraticCurveTo(0, w * 0.45, -w / 2, 0);
+        c.fill();
+      }
+    }
+
+    function emit(F, t, ember) { // 火舌尖飘出的火苗 / 火星
+      var tip = t.cur * 0.92, u = F.o.unit;
+      F.parts.push({
+        x: t.bx + t.ux * tip + (Math.random() - 0.5) * t.w * 0.4, y: t.by + t.uy * tip,
+        vx: (t.ux * 0.4 + rnd(0.08, 0.24)) * u, vy: t.uy * rnd(0.5, 0.9) * u,
+        r: ember ? rnd(0.009, 0.018) * u : t.w * rnd(0.22, 0.36),
+        t: 0, life: ember ? rnd(1.1, 2.3) : rnd(0.3, 0.6), ph: rnd(0, 6.28), e: ember
+      });
+    }
+
+    function step(F, dt) {
+      var o = F.o, u = o.unit, i;
+      F.clock += dt;
+      for (i = 0; i < F.T.length; i++) {
+        var t = F.T[i];
+        t.cur = F.heat * t.h * (0.7 + 0.2 * Math.sin(F.clock * t.f1 + t.p1) + 0.1 * Math.sin(F.clock * t.f2 + t.p2));
+        if (F.heat > 0.5) {
+          if (Math.random() < dt * o.wisps) emit(F, t, false);
+          if (Math.random() < dt * o.embers) emit(F, t, true);
+        }
+      }
+      var ctx = F.ctx, cv = F.cv, bc = F.bctx;
+      bc.setTransform(1, 0, 0, 1, 0, 0);
+      bc.clearRect(0, 0, F.body.width, F.body.height);
+      drawTongues(F, bc, BODY, o.bodyW, 1.12, BODY_STOPS, o.bodyA); // 外焰（低分辨率）
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.globalCompositeOperation = 'lighter';
+      if (o.glow && F.heat > 0) { // 火光：随火焰跳动的柔光
+        var gr = o.glow[2] * F.S * RES, gx = (F.OX + o.glow[0] * F.S) * RES, gy = (F.OY + o.glow[1] * F.S) * RES;
+        ctx.globalAlpha = Math.min(1, F.heat) * (0.3 + 0.07 * Math.sin(F.clock * 7.3) + 0.05 * Math.sin(F.clock * 12.1));
+        ctx.drawImage(GLOW, gx - gr, gy - gr, gr * 2, gr * 2);
+      }
+      ctx.globalAlpha = 1;
+      ctx.drawImage(F.body, 0, 0, cv.width, cv.height);
+      drawTongues(F, ctx, RES, 0.5, 0.72, CORE_STOPS, o.coreA); // 内焰（直接画在主画布上）
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      for (i = F.parts.length - 1; i >= 0; i--) {
+        var p = F.parts[i];
+        p.t += dt;
+        var k = p.t / p.life;
+        if (k >= 1) { F.parts.splice(i, 1); continue; }
+        p.vy -= 0.33 * u * dt; // 热气上升
+        p.x += (p.vx + Math.sin(p.t * 9 + p.ph) * (p.e ? 0.12 : 0.05) * u) * dt;
+        p.y += p.vy * dt;
+        var px = (F.OX + p.x * F.S) * RES, py = (F.OY + p.y * F.S) * RES, r = p.r * F.S * RES;
+        if (p.e) {
+          ctx.globalAlpha = (1 - k) * (0.55 + 0.45 * Math.sin(p.t * 20 + p.ph));
+          ctx.drawImage(EMBER, px - r, py - r, r * 2, r * 2);
+        } else {
+          r *= 1 - k * 0.6;
+          ctx.globalAlpha = Math.pow(1 - k, 1.4) * 0.55;
+          ctx.drawImage(WISP, px - r * 0.8, py - r * 1.8, r * 1.6, r * 2.8);
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    var flames = [];
+
+    // ① 标题「灵动云官网」：火舌沿每个字的顶边排开（字是斜体，火舌也略向右斜）
+    (function () {
+      var root = document.querySelector('[data-flame]');
+      if (!root) return;
+      var tx = root.querySelector('.flame-text'), fx = root.querySelector('.flame-fx');
+      if (!tx || !fx) return;
+      var SKEW = Math.tan(7 * Math.PI / 180);
+      var F = make(root, fx, fx.querySelector('.flame-canvas'), {
+        unit: 48, bodyW: 1.4, bodyA: 0.8, coreA: 0.85, wisps: 0.5, embers: 0.12, delay: 250,
+        measure: function (F, W, H) {
+          var cs = getComputedStyle(tx);
+          var fs = parseFloat(cs.fontSize) || 48;
+          var ls = parseFloat(cs.letterSpacing) || 0;
+          var lh = parseFloat(cs.lineHeight) || fs * 1.04;
+          F.o.unit = fs;
+          // 文字在火焰画布里的位置（不受进场动画的位移影响）
+          var x0 = tx.offsetLeft - fx.offsetLeft, y0 = tx.offsetTop - fx.offsetTop, h = tx.offsetHeight;
+          var off = document.createElement('canvas');
+          off.width = W;
+          off.height = H;
+          var oc = off.getContext('2d');
+          oc.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + fs + 'px ' + cs.fontFamily;
+          oc.textBaseline = 'alphabetic';
+          oc.fillStyle = '#fff';
+          var m = oc.measureText(tx.textContent);
+          var asc = m.fontBoundingBoxAscent || fs * 0.88, desc = m.fontBoundingBoxDescent || fs * 0.12;
+          var base = y0 + (lh - (asc + desc)) / 2 + asc;
+          var oy = y0 + h; // transform-origin: 0 100%
+          oc.setTransform(1, 0, -SKEW, 1, SKEW * oy, 0);
+          var x = x0, s = tx.textContent;
+          for (var i = 0; i < s.length; i++) {
+            oc.fillText(s[i], x, base);
+            x += oc.measureText(s[i]).width + ls;
+          }
+          var img = oc.getImageData(0, 0, W, H).data;
+          // 每一小段取最高的顶边点作为火舌的根
+          var bw = Math.max(4, fs * 0.13), top = {}, minX = W, maxX = 0;
+          for (var yy = 3; yy < H; yy += 2) {
+            for (var xx = 0; xx < W; xx += 2) {
+              if (img[(yy * W + xx) * 4 + 3] > 140 && img[((yy - 3) * W + xx) * 4 + 3] < 40) {
+                var b = Math.floor(xx / bw);
+                if (!top[b] || yy < top[b][1]) top[b] = [xx, yy];
+                if (xx < minX) minX = xx;
+                if (xx > maxX) maxX = xx;
+              }
+            }
+          }
+          var lx = 0.16 / Math.sqrt(1 + 0.16 * 0.16), ly = -1 / Math.sqrt(1 + 0.16 * 0.16);
+          F.T = [];
+          for (var key in top) {
+            var pt = top[key], f = (pt[0] - minX) / Math.max(1, maxX - minX);
+            var hot = f < 0.24 || f > 0.72 ? 1.2 : 1; // 首尾两个字火更旺
+            F.T.push(tongue(pt[0], pt[1] + fs * 0.05, lx, ly, fs * rnd(0.22, 0.46) * hot, bw * 2));
+          }
+          F.S = 1;
+          F.OX = 0;
+          F.OY = 0;
+        }
+      });
+      if (F) flames.push(F);
+    })();
+
+    // ② Hero 右侧 logo 徽标：火舌从球体右上缘背后窜起（坐标是徽标 SVG 的 viewBox 单位）
+    (function () {
+      var root = document.querySelector('[data-hero-logo]');
+      if (!root) return;
+      var fx = root.querySelector('.hl-fx');
+      if (!fx) return;
+      var CX = 340, CY = 280, R = 184, T = [];
+      function add(deg, h, w) {
+        var a = deg * D2R, nx = Math.cos(a), ny = Math.sin(a);
+        var dx = nx * 0.4 + 0.18, dy = -1 + ny * 0.4, l = Math.sqrt(dx * dx + dy * dy);
+        T.push(tongue(CX + nx * R * 0.95, CY + ny * R * 0.95, dx / l, dy / l, h, w));
+      }
+      // 角度（球心看过去）、高、宽：正上方偏右最旺，往两边逐渐变小
+      var DEG = [-110, -98, -86, -74, -62, -50, -38, -26, -14, -3];
+      var HH = [62, 80, 98, 112, 118, 112, 98, 80, 62, 46];
+      var WW = [36, 40, 44, 47, 48, 47, 44, 40, 36, 32];
+      for (var q = 0; q < DEG.length; q++) {
+        add(DEG[q] + rnd(-2.5, 2.5), HH[q] * rnd(0.85, 1.15), WW[q]);
+        if (q < DEG.length - 1) add(DEG[q] + 6 + rnd(-1.5, 1.5), (HH[q] + HH[q + 1]) * 0.3 * rnd(0.8, 1.15), WW[q] * 0.7); // 夹在中间的小火舌
+      }
+      var gA = -56 * D2R;
+      var F = make(root, fx, fx.querySelector('canvas'), {
+        unit: 180, bodyW: 1.55, bodyA: 0.9, coreA: 0.92, wisps: 2, embers: 0.5, delay: 1250,
+        glow: [CX + Math.cos(gA) * R, CY + Math.sin(gA) * R, 110],
+        measure: function (F) {
+          F.S = root.offsetWidth / 680; // viewBox 680×560 → CSS 像素
+          F.OX = -fx.offsetLeft;
+          F.OY = -fx.offsetTop;
+        }
+      });
+      if (F) { F.T = T; flames.push(F); }
+    })();
+
+    if (!flames.length) return;
+
+    var raf = 0, last = 0;
+    function frame(now) {
+      raf = 0;
+      if (document.hidden) { last = 0; return; }
+      var any = false, i;
+      for (i = 0; i < flames.length; i++) if (flames[i].on) any = true;
+      if (!any) { last = 0; return; }
+      var dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      if (last && dt < minDt) { raf = requestAnimationFrame(frame); return; } // 手机：跳帧到 30 帧/秒
+      last = now;
+      for (i = 0; i < flames.length; i++) {
+        var F = flames[i];
+        if (!F.on) continue;
+        if (F.heat < 1 && now >= F.igniteAt) { // 点燃：火舌先窜高一点再回落
+          var e = Math.min(1, (now - F.igniteAt) / 700), c1 = 1.9;
+          F.heat = e < 1 ? 1 + (c1 + 1) * Math.pow(e - 1, 3) + c1 * Math.pow(e - 1, 2) : 1;
+          if (!F.burst) {
+            F.burst = true;
+            for (var j = 0; j < F.T.length; j += 2) { emit(F, F.T[j], true); emit(F, F.T[j], false); }
+          }
+        }
+        step(F, dt);
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    function play() { if (animate && !raf) raf = requestAnimationFrame(frame); }
+    function still(F) { F.parts = []; F.clock = 0.7; for (var i = 0; i < 40; i++) step(F, 0.03); }
+    function sizeAll() { flames.forEach(function (F) { F.size(); if (!animate) still(F); }); }
+
+    // 出场：logo 开场动画结束后（没有开场动画就是现在）依次点燃
+    function begin() {
+      var now = performance.now();
+      flames.forEach(function (F) { F.igniteAt = now + F.o.delay; });
+    }
+    if (animate) {
+      if (d.classList.contains('ldy-intro')) {
+        var mo = new MutationObserver(function () {
+          if (!d.classList.contains('ldy-intro')) { mo.disconnect(); begin(); }
+        });
+        mo.observe(d, { attributes: true, attributeFilter: ['class'] });
+      } else begin();
+    }
+
+    function init() { sizeAll(); play(); }
+    var rt = 0;
+    addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(sizeAll, 150);
+    });
+    if ('IntersectionObserver' in window) {
+      flames.forEach(function (F) {
+        new IntersectionObserver(function (es) {
+          F.on = es[0].isIntersecting;
+          F.root.classList.toggle('is-off', !F.on); // 滚出屏幕时 CSS 动效也暂停
+          if (F.on) play();
+        }).observe(F.root);
+      });
+    }
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) play(); });
+    // 标题要等字体加载好才能量准字形
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(init); else init();
+  })();
+</script>

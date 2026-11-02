@@ -4,17 +4,30 @@ import { glob } from 'astro/loaders';
 const guides = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/guides' }),
   schema: z.object({
+    /** 页面 H1 */
     title: z.string(),
+    /** 面包屑与卡片使用的短标题 */
+    short: z.string(),
+    /** <title> */
     seoTitle: z.string(),
     description: z.string(),
     excerpt: z.string(),
     category: z.string(),
-    keywords: z.array(z.string()),
     order: z.number(),
     published: z.string(),
     updated: z.string(),
-    related: z.array(z.string()),
-    sources: z.array(z.object({ title: z.string(), url: z.string().url() })),
+    /** 正文前的首段（先给答案） */
+    lead: z.string().optional(),
+    /** 在首段之后插入“灵动云官方站点”区块 */
+    family: z.boolean().default(false),
+    /** 在首段之后插入 9 档套餐价格表（数据来自 src/data/site.ts） */
+    planTable: z.boolean().default(false),
+    /** 站内相关文章（slug） */
+    related: z.array(z.string()).default([]),
+    /** 官方站点上的相关页面（只填官方站点清单中的地址） */
+    more: z.array(z.object({ label: z.string(), title: z.string(), url: z.string().url(), note: z.string() })).default([]),
+    /** 页面上可见的问答，同时生成 FAQPage */
+    faqs: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
   }),
 });
 

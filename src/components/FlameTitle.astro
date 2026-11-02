@@ -1,0 +1,73 @@
+---
+// 官网首页标题「灵动云官网」的紫焰效果。
+// 文字仍是 <h1> 里的真实文字（搜索引擎照常读取）；火焰（canvas）、光环和星点都是装饰，对读屏和抓取隐藏。
+// 火焰只在标题出现在屏幕上时播放；系统开了「减少动态效果」、抓取程序或不支持动画的浏览器只显示静态光效。
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+
+<span class="flame" data-flame>
+  <span class="flame-fx" aria-hidden="true">
+    <svg class="flame-orbit" viewBox="0 0 600 200" preserveAspectRatio="none" focusable="false">
+      <defs>
+        <linearGradient id="flame-orbit-g" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#6d28d9" stop-opacity="0" />
+          <stop offset=".22" stop-color="#7c3aed" stop-opacity=".9" />
+          <stop offset=".55" stop-color="#f3e8ff" />
+          <stop offset=".8" stop-color="#a855f7" stop-opacity=".9" />
+          <stop offset="1" stop-color="#6d28d9" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <path class="fo-glow" d="M6 150 C 130 214, 420 206, 594 64" />
+      <path class="fo-line" d="M6 150 C 130 214, 420 206, 594 64" />
+      <path class="fo-glint" d="M6 150 C 130 214, 420 206, 594 64" pathLength="100" />
+      <path class="fo-thin" d="M40 118 C 180 168, 430 160, 560 92" />
+    </svg>
+    <canvas class="flame-canvas"></canvas>
+    <i class="spark s1"></i><i class="spark s2"></i><i class="spark s3"></i><i class="spark s4"></i>
+  </span>
+  <span class="flame-text">{text}</span>
+</span>
+
+<style>
+  .flame { position: relative; display: inline-block; isolation: isolate; padding-right: 0.14em; }
+  .flame-text {
+    position: relative; z-index: 2; display: inline-block;
+    font-weight: 800; letter-spacing: 0.04em;
+    transform: skewX(-7deg); transform-origin: 0 100%;
+    color: #f4efff;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 12px rgba(168, 85, 247, 0.85)) drop-shadow(0 0 30px rgba(109, 40, 217, 0.6));
+  }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .flame-text {
+      background: linear-gradient(180deg, #ffffff 0%, #f7f2ff 32%, #dccaff 58%, #a98bff 82%, #8b5cf6 100%);
+      -webkit-background-clip: text; background-clip: text;
+      color: transparent; -webkit-text-fill-color: transparent;
+    }
+  }
+  .flame-fx { position: absolute; z-index: 1; left: -0.4em; right: -0.5em; top: -0.58em; bottom: -0.16em; pointer-events: none; }
+  .flame-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .flame-orbit { position: absolute; left: -2%; top: 42%; width: 106%; height: 56%; overflow: visible; fill: none; }
+  .fo-glow { stroke: #8b5cf6; stroke-width: 9; stroke-opacity: 0.22; filter: blur(6px); }
+  .fo-line { stroke: url(#flame-orbit-g); stroke-width: 2.6; stroke-linecap: round; }
+  .fo-thin { stroke: #c4b5fd; stroke-width: 1; stroke-opacity: 0.28; stroke-dasharray: 2 9; stroke-linecap: round; }
+  .fo-glint { stroke: #ffffff; stroke-width: 3.4; stroke-linecap: round; stroke-dasharray: 9 91; stroke-dashoffset: 100; opacity: 0; }
+  .spark { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #f5edff; box-shadow: 0 0 8px 2px rgba(192, 132, 252, 0.8); opacity: 0.75; }
+  .s1 { left: 6%; top: 12%; } .s2 { left: 58%; top: 2%; width: 3px; height: 3px; } .s3 { right: 2%; top: 26%; } .s4 { left: 34%; bottom: 4%; width: 3px; height: 3px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .fo-glint { animation: flame-glint 3.6s cubic-bezier(.45, 0, .25, 1) 1.2s infinite; }
+    .spark { animation: flame-twinkle 2.8s ease-in-out infinite; }
+    .s2 { animation-delay: .7s; } .s3 { animation-delay: 1.4s; } .s4 { animation-delay: 2.1s; }
+  }
+  .flame.is-off .fo-glint, .flame.is-off .spark { animation-play-state: paused; } /* 标题滚出屏幕时暂停 */
+  @keyframes flame-glint { 0% { stroke-dashoffset: 100; opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { stroke-dashoffset: -10; opacity: 0; } }
+  @keyframes flame-twinkle { 0%, 100% { opacity: 0.15; scale: 0.6; } 50% { opacity: 0.9; scale: 1; } }
+  @media (forced-colors: active) {
+    .flame-text { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; filter: none; }
+    .flame-fx { display: none; }
+  }
+  @media print { .flame-fx { display: none; } .flame-text { filter: none; background: none; color: #000; -webkit-text-fill-color: #000; } }
+</style>
