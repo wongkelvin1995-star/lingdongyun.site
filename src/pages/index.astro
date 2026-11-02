@@ -1,311 +1,247 @@
 ---
-import { getCollection } from 'astro:content';
+import FlameTitle from '../components/FlameTitle.astro';
+import FlameScript from '../components/FlameScript.astro';
 import Base from '../layouts/Base.astro';
-import HeroArt from '../components/HeroArt.astro';
+import HeroLogo from '../components/HeroLogo.astro';
 import Icon from '../components/Icon.astro';
-import { REVIEWS } from '../data/reviews';
-import { FAQS, PLANS, PLAN_FILTERS, PLAN_NOTE, SITE, readMinutes } from '../data/site';
+import Family from '../components/Family.astro';
+import { COMMON_FACTS, FAQS, LINKS, PLANS, PLAN_FILTERS, PLAN_NOTE, SITE, perMonth, saving, yuan } from '../data/site';
+import { faqPage, planCatalog } from '../data/jsonld';
 
-const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
+const title = '灵动云官网｜灵动云机场套餐价格与注册入口（Lingdongyun）';
+const description = SITE.description;
+const home = `${SITE.url}/`;
 
-const title = '灵动云官网 - 灵动云机场 Lingdongyun｜2026 机场推荐与套餐价格';
-const description =
-  '灵动云官网（lingdongyun.site）：灵动云机场提供 8 档套餐，月付 ¥20 起、年付 ¥99（每月 70GB）、一次性流量包 150GB–800GB 总流量，并附灵动云 VPN 客户端配置、Clash 订阅导入与机场选购指南。';
+const regular = PLANS.filter((p) => p.category !== 'custom');
+const custom = PLANS.find((p) => p.category === 'custom')!;
+const ext = (external?: boolean) => (external ? { target: '_blank', rel: 'noopener' } : {});
 
-const planBy = (name: string) => PLANS.find((p) => p.name === name)!;
-const scenarios = [
-  { icon: 'leaf', title: '轻度浏览，长期使用', text: '主要查资料、看网页、收发消息，每月用量不大，希望一次付清、省心用一年。', plan: planBy('灵动·穿云') },
-  { icon: 'globe', title: '刚开始尝试', text: '第一次使用，还不清楚自己每月用多少流量，想先用小档位熟悉一下。', plan: planBy('灵动·拂风') },
-  { icon: 'play', title: '每天看视频', text: '日常追剧、刷视频、听音乐，使用频率高，需要更充足的每月流量。', plan: planBy('灵动·驭浪') },
-  { icon: 'monitor', title: '高清内容与多设备', text: '经常观看高清视频，或者电脑、手机多台设备一起使用同一个套餐。', plan: planBy('灵动·破晓') },
-  { icon: 'zap', title: '重度使用', text: '长时间在线、经常下载大文件，每月流量需求很大。', plan: planBy('灵动·凌霄') },
-  { icon: 'briefcase', title: '偶尔出差或短期项目', text: '平时很少用，只在出差、旅行或短期项目时集中使用，不想按月付费。', plan: planBy('灵动·闲云'), note: '用量更大可选灵动·惊云（400GB）或灵动·飞云（800GB）' },
+// Hero 下方的事实条：只列 SPEC §2 中的真实信息
+const FACTS = [
+  { icon: 'tag', text: '9 档透明定价' },
+  { icon: 'gauge', text: '不限速' },
+  { icon: 'devices', text: '不限设备' },
+  { icon: 'route', text: 'IEPL / IPLC 优化线路' },
+  { icon: 'chat', text: '在线客服与工单' },
 ] as const;
 
-const features = [
-  { icon: 'layers', title: '按需选购', text: '从月付到流量包，选择适合自己的节奏。', href: '/guides/plan-selection/' },
-  { icon: 'devices', title: '多端指南', text: '了解 Clash 与 Clash Party 等客户端的使用知识。', href: '/guides/multi-device-clients/' },
-  { icon: 'compass', title: '清楚上手', text: '套餐、订阅与节点，一站了解。', href: '/guides/getting-started/' },
-] as const;
-
-const org = {
-  '@type': 'Organization',
-  '@id': `${SITE.url}/#organization`,
-  name: SITE.brand,
-  alternateName: [...SITE.aliases],
-  description: SITE.description,
-  url: `${SITE.url}/`,
-  logo: `${SITE.url}/logo-512.png`,
-};
-
-const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        ...org,
-        hasOfferCatalog: {
-          '@type': 'OfferCatalog',
-          name: '灵动云套餐',
-          itemListElement: PLANS.map((p) => ({
-            '@type': 'Offer',
-            name: p.name,
-            price: p.price.toFixed(2),
-            priceCurrency: 'CNY',
-            category: p.categoryLabel,
-            description: `${p.categoryLabel}，¥${p.price} ${p.billing}，${p.traffic}`,
-            url: SITE.registerUrl,
-            itemOffered: { '@type': 'Service', name: p.name },
-          })),
-        },
-      },
-      {
-        '@type': 'WebSite',
-        '@id': `${SITE.url}/#website`,
-        name: SITE.name,
-        alternateName: ['灵动云', 'Lingdongyun', 'LINGDONG CLOUD'],
-        url: `${SITE.url}/`,
-        inLanguage: 'zh-CN',
-        publisher: { '@id': `${SITE.url}/#organization` },
-      },
-      {
-        '@type': 'FAQPage',
-        '@id': `${SITE.url}/#faq`,
-        mainEntity: FAQS.map((f) => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
-    ],
-  },
-];
+const jsonLd = [planCatalog(home), faqPage(home, FAQS)];
 ---
 <Base title={title} description={description} path="/" jsonLd={jsonLd}>
-  <meta slot="head" name="keywords" content="灵动云,灵动云官网,灵动云机场,灵动云VPN,lingdongyun,LINGDONG CLOUD,机场推荐 2026" />
-  <!-- Hero -->
+  <!-- Hero：官网是什么、这里能找到什么 -->
   <section class="hero">
+    <div class="hero-sky" aria-hidden="true"></div>
     <div class="container hero-grid">
       <div class="hero-copy">
-        <p class="hero-kicker"><span class="dot" aria-hidden="true"></span>LINGDONG CLOUD · 灵动云官网</p>
-        <h1>连接世界，<br /><span class="accent">灵动随行。</span></h1>
-        <p class="hero-lead">灵动云机场提供月付、年付与一次性流量套餐，先比较付款周期，再按预算和用量选择。结合套餐价格说明、Clash订阅导入与小火箭使用指南，了解流量规划和客户端配置，让科学上网从选套餐到首次连接都有清晰参考。</p>
-        <ul class="hero-points">
-          <li><Icon name="check" size={18} />灵活套餐</li>
-          <li><Icon name="check" size={18} />多端指南</li>
-          <li><Icon name="check" size={18} />清晰上手</li>
-        </ul>
+        <p class="hero-kicker"><span class="dot" aria-hidden="true"></span>LINGDONG CLOUD</p>
+        <h1><span class="h1-name"><FlameTitle text="灵动云官网" /></span><span class="h1-tag">连接世界，<span class="accent">灵动随行。</span></span></h1>
+        <p class="hero-lead">灵动云（Lingdongyun）是提供代理节点订阅（俗称“机场”）的网络服务品牌，lingdongyun.site 是它的官网。这一页列出全部 9 档套餐的价格与流量、所有套餐共用的服务规则和注册入口：月付 <span class="nw">¥20/月起</span>，年付 <span class="nw">¥99/年</span>，一次性流量包 <span class="nw">¥199 起</span>，另有至尊私人定制；不限速、不限设备，使用 <span class="nw">IEPL / IPLC</span> 优化线路。</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#pricing">查看套餐<Icon name="arrow" size={18} /></a>
-          <a class="btn btn-outline" href="/guides/">阅读使用指南</a>
+          <a class="btn btn-primary" href={SITE.registerUrl} target="_blank" rel="noopener">注册账号</a>
+          <a class="btn btn-outline" href="#pricing">查看 9 档套餐</a>
         </div>
       </div>
       <div class="hero-visual">
-        <HeroArt />
+        <HeroLogo />
       </div>
     </div>
-  </section>
-
-  <!-- 服务优势 -->
-  <section class="section" id="features" aria-labelledby="features-title">
     <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">服务优势</span>
-        <h2 id="features-title">让连接的每一步，都更清楚</h2>
-      </div>
-      <div class="feature-grid">
-        {features.map((f) => (
-          <article class="feature card">
-            <span class="feature-icon"><Icon name={f.icon} size={28} /></span>
-            <h3><a href={f.href}>{f.title}</a></h3>
-            <p>{f.text}</p>
-            <span class="feature-more" aria-hidden="true">阅读详细指南<Icon name="arrow" size={16} /></span>
-          </article>
+      <ul class="facts">
+        {FACTS.map((f) => (
+          <li><Icon name={f.icon} size={18} /><span>{f.text}</span></li>
         ))}
+      </ul>
+    </div>
+  </section>
+  <FlameScript />
+
+  <!-- 9 档套餐 -->
+  <section class="section section-soft pricing" id="pricing" aria-labelledby="pricing-title">
+    <div class="container">
+      <div class="pricing-top">
+        <div class="section-head">
+          <span class="eyebrow">套餐价格</span>
+          <h2 id="pricing-title">9 档套餐与价格</h2>
+          <p>月付 4 档、年付 1 档、一次性流量包 3 档，另有 1 档至尊私人定制。</p>
+        </div>
+        <div class="plan-filter" role="group" aria-label="按套餐类型筛选" data-plan-filter>
+          {PLAN_FILTERS.map((f, i) => (
+            <button type="button" class="filter-btn" data-filter={f.key} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>
+          ))}
+        </div>
+      </div>
+      <p class="sr-only" aria-live="polite" data-plan-status></p>
+
+      <!-- 8 档常规套餐：一排横向排开，手机左右滑、电脑点箭头或拖动触控板 -->
+      <div class="rail" data-rail>
+        <div class="rail-bar">
+          <p class="rail-hint"><span class="rail-hint-touch">左右滑动查看全部套餐</span><span class="rail-hint-mouse">左右滚动查看全部套餐</span></p>
+          <div class="rail-nav">
+            <button type="button" class="rail-btn" data-rail-prev aria-label="向左查看上一组套餐" disabled>
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12.5 4.5 7 10l5.5 5.5" /></svg>
+            </button>
+            <button type="button" class="rail-btn" data-rail-next aria-label="向右查看下一组套餐">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path d="M7.5 4.5 13 10l-5.5 5.5" /></svg>
+            </button>
+          </div>
+        </div>
+        <ul class="plan-grid" data-plan-grid tabindex="0" aria-label="套餐卡片（可左右滚动）">
+          {regular.map((p) => (
+            <li class:list={['plan card', { featured: p.badge, 'has-cycles': p.cycles }]} data-category={p.category}>
+              <div class="plan-top">
+                <span class="plan-cat">{p.categoryLabel}</span>
+                {p.badge && <span class="plan-badge">{p.badge}</span>}
+              </div>
+              <h3 class="plan-name">{p.name}{p.sub && <small>{p.sub}</small>}</h3>
+              <p class="plan-price"><span class="cur">¥</span><span class="num">{p.price}</span><span class="bill">{p.billing}</span></p>
+              <p class="plan-traffic">{p.category === 'onetime' ? `${p.traffic} 总流量` : p.traffic}</p>
+              {p.cycles ? (
+                <table class="cycles">
+                  <caption class="sr-only">{p.name} 四个付款周期的价格</caption>
+                  <thead><tr><th scope="col">付款周期</th><th scope="col">价格</th><th scope="col">折合每月</th></tr></thead>
+                  <tbody>
+                    {p.cycles.map((c) => (
+                      <tr class:list={{ best: c.months === 12 }}>
+                        <th scope="row">{c.label}{c.off && <span class="off">{c.off}</span>}</th>
+                        <td class="c-total">¥{yuan(c.price)}</td>
+                        <td class="c-month">¥{yuan(perMonth(c))}<small>/月</small></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : null}
+              <p class="plan-hint">{p.cycles ? `年付最省：比按月付一年省 ¥${yuan(saving(p, p.cycles[p.cycles.length - 1]))}` : p.hint}</p>
+              <a class:list={['btn', p.badge ? 'btn-primary' : 'btn-outline', 'plan-btn']} href={SITE.registerUrl} target="_blank" rel="noopener" aria-label={`选择此套餐：${p.name}`}>选择此套餐</a>
+            </li>
+          ))}
+        </ul>
+        <div class="rail-track" aria-hidden="true"><span class="rail-thumb" data-rail-thumb></span></div>
+      </div>
+
+      <div class="plan card plan-custom" data-category="custom" data-plan-custom>
+        <svg class="pc-orbit" viewBox="0 0 600 260" aria-hidden="true" focusable="false">
+          <ellipse cx="420" cy="150" rx="300" ry="70" transform="rotate(-10 420 150)" />
+          <ellipse cx="420" cy="150" rx="210" ry="46" transform="rotate(-10 420 150)" />
+        </svg>
+        <div class="pc-main">
+          <div class="plan-top"><span class="plan-cat">{custom.categoryLabel}</span></div>
+          <h3 class="plan-name">{custom.name}</h3>
+          <p class="plan-hint">{custom.hint}</p>
+        </div>
+        <div class="pc-price">
+          <p class="plan-price"><span class="cur">¥</span><span class="num">{custom.price}</span><span class="bill">{custom.billing}</span></p>
+          <p class="plan-traffic">{custom.traffic}</p>
+        </div>
+        <div class="pc-actions">
+          <a class="btn btn-primary plan-btn" href={SITE.registerUrl} target="_blank" rel="noopener" aria-label={`选择此套餐：${custom.name}`}>选择此套餐</a>
+          <a class="pc-more" href="/guides/plan-selection/#custom">定制套餐说明<Icon name="arrow" size={16} /></a>
+        </div>
+      </div>
+      <div class="plan-foot">
+        <p class="plan-note">{PLAN_NOTE}</p>
+        <div class="plan-links">
+          <a href={LINKS.bestHome}>不确定选哪档？用套餐选择估算每月流量<Icon name="arrow" size={16} /></a>
+          <a href="/guides/plan-selection/">完整价格表与计费规则<Icon name="arrow" size={16} /></a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 关于灵动云 -->
-  <section class="section about" id="about" aria-labelledby="about-title">
+  <!-- 服务说明：9 档套餐共用的规则 -->
+  <section class="section about" id="service" aria-labelledby="service-title">
     <div class="container about-grid">
       <div class="about-copy">
-        <span class="eyebrow">关于灵动云</span>
-        <h2 id="about-title">灵动云是什么？</h2>
-        <p><strong>灵动云</strong>（LINGDONG CLOUD，拼音 lingdongyun）是一个提供代理节点订阅的机场服务品牌，<strong>灵动云官网</strong>为 lingdongyun.site。网上常说的“灵动云机场”“灵动云VPN”，指的都是这个品牌。</p>
-        <p>灵动云提供月付、年付与一次性流量包三类套餐，订阅可配合 Clash、Clash Party、小火箭等客户端使用；注册、购买与订阅管理通过官网按钮进入的官方账户平台完成。</p>
-        <a class="about-link" href="/guides/lingdongyun-official/">了解官方网址、注册入口与防仿冒方法<Icon name="arrow" size={16} /></a>
+        <span class="eyebrow">服务说明</span>
+        <h2 id="service-title">9 档套餐共用的服务规则</h2>
+        <p>无论选月付、年付、流量包还是私人定制，以下规则都相同：<strong>不限速</strong>、按 <strong>1.0 倍率</strong>计费、<strong>不限设备数量</strong>，协议、线路与节点地区也一致。至尊私人定制在此基础上另配独立带宽和专属公网 IP，不与其他用户共享。</p>
+        <p>售后有两个渠道：<a href={LINKS.sbsHome}>帮助中心</a>的在线客服，以及用户中心工单。</p>
+        <a class="about-link" href="/guides/plan-selection/">逐档查看计费规则、线路与节点<Icon name="arrow" size={16} /></a>
       </div>
       <dl class="about-facts card">
-        <div><dt>品牌名称</dt><dd>灵动云 · LINGDONG CLOUD</dd></div>
-        <div><dt>官方网址</dt><dd>lingdongyun.site</dd></div>
-        <div><dt>常见叫法</dt><dd>灵动云机场、灵动云VPN、灵动云官网</dd></div>
-        <div><dt>套餐类型</dt><dd>月付 ¥20 起 · 年付 ¥99 · 一次性流量包</dd></div>
-        <div><dt>适用客户端</dt><dd>Clash、Clash Party、小火箭等（以订阅格式为准）</dd></div>
-        <div><dt>注册入口</dt><dd><a href={SITE.registerUrl} target="_blank" rel="noopener">官方账户平台</a></dd></div>
+        {COMMON_FACTS.map((f) => (
+          <div><dt>{f.label}</dt><dd>{f.value}</dd></div>
+        ))}
       </dl>
     </div>
   </section>
 
-  <!-- 套餐价格 -->
-  <section class="section section-soft" id="pricing" aria-labelledby="pricing-title">
+  <!-- 灵动云官方站点 -->
+  <div class="section section-soft">
     <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">套餐价格</span>
-        <h2 id="pricing-title">找到适合你的那一款</h2>
-        <p>月付、年付与一次性流量包，按需选择。</p>
-      </div>
-
-      <div class="plan-filter" role="group" aria-label="按套餐类型筛选" data-plan-filter>
-        {PLAN_FILTERS.map((f, i) => (
-          <button type="button" class="filter-btn" data-filter={f.key} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>
-        ))}
-      </div>
-      <p class="sr-only" aria-live="polite" data-plan-status></p>
-
-      <ul class="plan-grid" data-plan-grid>
-        {PLANS.map((p) => (
-          <li class:list={['plan card', { featured: p.badge }]} data-category={p.category}>
-            <div class="plan-top">
-              <span class="plan-cat">{p.categoryLabel}</span>
-              {p.badge && <span class="plan-badge">{p.badge}</span>}
-            </div>
-            <h3 class="plan-name">{p.name}</h3>
-            <p class="plan-price"><span class="cur">¥</span><span class="num">{p.price}</span><span class="bill">{p.billing}</span></p>
-            <p class="plan-traffic">{p.traffic}</p>
-            <p class="plan-hint">
-              {p.category === 'monthly' && '按月计费，每月对应流量'}
-              {p.category === 'yearly' && '全年费用 ¥99，每月 70GB'}
-              {p.category === 'onetime' && '一次性支付，享有总流量'}
-            </p>
-            <a class:list={['btn', p.badge ? 'btn-primary' : 'btn-outline', 'plan-btn']} href={SITE.registerUrl} target="_blank" rel="noopener" aria-label={`选择此套餐：${p.name}`}>选择此套餐</a>
-          </li>
-        ))}
-      </ul>
-      <p class="plan-note">{PLAN_NOTE}</p>
+      <Family />
     </div>
-  </section>
+  </div>
 
-  <!-- 教学指南 -->
-  <section class="section section-guides" id="guides" aria-labelledby="guides-title">
-    <div class="container">
-      <div class="section-head">
-        <span class="pill">官方知识库 · 新手教程与节点科普</span>
-        <h2 id="guides-title" class="guides-title">灵动云 <span>使用教程与网络指南</span></h2>
-        <p>选得明白，用得顺手：从机场选购、节点稳定性判断、订阅安全，到 Clash 与 Clash Party 客户端的导入、更新和排错，一站读懂。</p>
-      </div>
-      <ul class="guide-grid">
-        {guides.map((g) => (
-          <li class="guide card">
-            <div class="guide-top">
-              <span class="guide-cat">{g.data.category}</span>
-              <span class="guide-time">约 {readMinutes(g.body)} 分钟</span>
-            </div>
-            <h3><a href={`/guides/${g.id}/`}>{g.data.title}</a></h3>
-            <p>{g.data.excerpt}</p>
-            <span class="guide-more" aria-hidden="true"><span>阅读完整指南</span><Icon name="arrow" size={18} /></span>
-          </li>
-        ))}
-      </ul>
-      <div class="center-cta">
-        <a class="btn btn-outline" href="/guides/"><Icon name="book" size={18} />查看全部指南</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 适用场景 -->
-  <section class="section section-soft" id="scenarios" aria-labelledby="scenarios-title">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">适用场景</span>
-        <h2 id="scenarios-title">你属于哪一类用户？</h2>
-        <p>对照自己的使用习惯，找到更合适的套餐。</p>
-      </div>
-      <ul class="scene-grid">
-        {scenarios.map((sc) => (
-          <li class:list={['scene card', { featured: sc.plan.badge }]}>
-            <div class="scene-head">
-              <span class="scene-icon"><Icon name={sc.icon} size={24} /></span>
-              <h3>{sc.title}</h3>
-            </div>
-            <p class="scene-text">{sc.text}</p>
-            <div class="scene-plan">
-              <span class="scene-label">推荐套餐</span>
-              <div class="scene-row">
-                <strong>{sc.plan.name}</strong>
-                {sc.plan.badge && <span class="plan-badge">{sc.plan.badge}</span>}
-              </div>
-              <p class="scene-price"><span>¥{sc.plan.price}</span> {sc.plan.billing} · {sc.plan.traffic}</p>
-              {'note' in sc && sc.note && <p class="scene-note">{sc.note}</p>}
-            </div>
-            <a class:list={['btn', sc.plan.badge ? 'btn-primary' : 'btn-outline', 'scene-btn']} href={SITE.registerUrl} target="_blank" rel="noopener" aria-label={`选择此套餐：${sc.plan.name}`}>选择此套餐</a>
-          </li>
-        ))}
-      </ul>
-      <p class="plan-note">场景仅供参考，请按自己的实际用量选择；套餐信息以注册后台实际展示为准。不确定怎么选？阅读<a href="/guides/plan-selection/">灵动云套餐怎么选</a>。</p>
-    </div>
-  </section>
-
-  {REVIEWS.length > 0 && (
-  <!-- 用户评价：仅在 src/data/reviews.ts 中有真实授权评价时显示 -->
-  <section class="section" id="reviews" aria-labelledby="reviews-title">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">用户声音</span>
-        <h2 id="reviews-title">用户评价</h2>
-      </div>
-      <ul class="review-grid">
-        {REVIEWS.map((r) => (
-          <li class="review card">
-            <div class="stars" role="img" aria-label={`${r.rating} 星（满分 5 星）`}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <svg class:list={['star', { off: i > r.rating }]} viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 1.8l2.5 5.2 5.7.8-4.1 4 1 5.6L10 14.7l-5.1 2.7 1-5.6-4.1-4 5.7-.8L10 1.8z" /></svg>
-              ))}
-            </div>
-            <blockquote>{r.content}</blockquote>
-            <div class="review-meta">
-              <span class="avatar" aria-hidden="true">{r.name.slice(0, 1)}</span>
-              <span class="who"><strong>{r.name}</strong>{r.plan && <small>{r.plan}</small>}</span>
-              <time datetime={r.date}>{r.date}</time>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-  )}
-
-  <!-- FAQ -->
+  <!-- FAQ：品牌层面的问题 -->
   <section class="section" id="faq" aria-labelledby="faq-title">
-    <div class="container faq-wrap">
+    <div class="container faq-grid">
       <div class="section-head">
         <span class="eyebrow">FAQ</span>
         <h2 id="faq-title">常见问题</h2>
-        <p>关于套餐、注册、客户端与订阅安全的说明。</p>
+        <p>关于官网、注册、价格、设备与售后的简要回答，详细内容在对应的官方站点。</p>
       </div>
       <div class="faq-list">
         {FAQS.map((f, i) => (
           <details class="faq-item" open={i === 0}>
-            <summary><h3>{f.q}</h3><span class="faq-icon" aria-hidden="true"><Icon name="plus" size={20} /></span></summary>
-            <div class="faq-a"><p>{f.a}</p></div>
+            <summary><h3>{f.q}</h3><span class="faq-icon" aria-hidden="true"><Icon name="plus" size={18} /></span></summary>
+            <div class="faq-a">
+              <p>{f.a}</p>
+              {f.link && <a class="faq-link" href={f.link.href} {...ext(f.link.external)}>{f.link.text}<Icon name="arrow" size={16} /></a>}
+            </div>
           </details>
         ))}
-      </div>
-      <div class="faq-cta card">
-        <div>
-          <p class="faq-cta-title">准备好开始了吗？</p>
-          <p class="faq-cta-text">在灵动云账户平台完成注册，并查看套餐的实际展示信息。</p>
-        </div>
-        <a class="btn btn-primary" href={SITE.registerUrl} target="_blank" rel="noopener">立即注册</a>
       </div>
     </div>
   </section>
 </Base>
 
 <script>
+  // 套餐筛选 + 横向滚动（左右箭头、进度条、两侧渐隐）
   const group = document.querySelector<HTMLElement>('[data-plan-filter]');
+  const rail = document.querySelector<HTMLElement>('[data-rail]');
+  const grid = document.querySelector<HTMLElement>('[data-plan-grid]');
   const cards = document.querySelectorAll<HTMLElement>('[data-plan-grid] > li');
+  const customCard = document.querySelector<HTMLElement>('[data-plan-custom]');
   const status = document.querySelector<HTMLElement>('[data-plan-status]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-rail-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-rail-next]');
+  const thumb = document.querySelector<HTMLElement>('[data-rail-thumb]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  let raf = 0;
+  const update = () => {
+    raf = 0;
+    if (!grid || !rail) return;
+    const max = grid.scrollWidth - grid.clientWidth;
+    const x = grid.scrollLeft;
+    const scrollable = max > 2;
+    rail.classList.toggle('is-scrollable', scrollable);
+    grid.classList.toggle('fade-l', scrollable && x > 2);
+    grid.classList.toggle('fade-r', scrollable && x < max - 2);
+    if (prev) prev.disabled = !scrollable || x <= 2;
+    if (next) next.disabled = !scrollable || x >= max - 2;
+    if (thumb && scrollable) {
+      const ratio = grid.clientWidth / grid.scrollWidth;
+      thumb.style.width = `${ratio * 100}%`;
+      thumb.style.transform = `translateX(${(x / grid.scrollWidth / ratio) * 100}%)`;
+    }
+  };
+  const schedule = () => { if (!raf) raf = requestAnimationFrame(update); };
+  const step = (dir: number) => {
+    if (!grid) return;
+    const first = Array.from(cards).find((c) => !c.hidden);
+    const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+    const card = first ? first.getBoundingClientRect().width + gap : grid.clientWidth;
+    const perView = Math.max(1, Math.floor((grid.clientWidth + gap) / card));
+    grid.scrollBy({ left: dir * perView * card, behavior: reduce.matches ? 'auto' : 'smooth' });
+  };
+  prev?.addEventListener('click', () => step(-1));
+  next?.addEventListener('click', () => step(1));
+  grid?.addEventListener('scroll', schedule, { passive: true });
+  if (grid && 'ResizeObserver' in window) new ResizeObserver(schedule).observe(grid);
+  window.addEventListener('load', schedule);
+  update();
+
   if (group) {
     group.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-filter]');
@@ -318,175 +254,258 @@ const jsonLd = [
         c.hidden = !show;
         if (show) n++;
       });
-      if (status) status.textContent = `${btn.textContent}：共 ${n} 个套餐`;
+      const showCustom = key === 'all' || key === 'custom';
+      if (customCard) customCard.hidden = !showCustom;
+      if (rail) rail.hidden = n === 0;
+      if (grid) grid.scrollLeft = 0;
+      update();
+      if (status) status.textContent = `${btn.textContent}：共 ${n + (showCustom ? 1 : 0)} 档套餐`;
     });
   }
 </script>
 
 <style>
-  /* Hero */
-  .hero { position: relative; padding: 56px 0 24px; overflow: hidden;
-    background: radial-gradient(1200px 500px at 85% -10%, #e0f2fe 0%, rgba(240, 249, 255, 0) 60%), #fff; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1.05fr; align-items: center; gap: 40px; }
-  .hero-kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; letter-spacing: .12em; color: var(--primary);
-    background: var(--soft); border: 1px solid var(--border); padding: 6px 14px; border-radius: 999px; }
-  .hero-kicker .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-2); box-shadow: 0 0 0 4px rgba(2, 132, 199, .15); }
-  .hero h1 { font-size: clamp(40px, 5.6vw, 66px); font-weight: 800; margin-top: 22px; line-height: 1.18; letter-spacing: .02em; }
-  .hero h1 .accent { color: var(--primary); }
-  .hero-lead { font-size: clamp(16px, 1.35vw, 18px); line-height: 1.85; color: var(--muted); margin-top: 20px; max-width: 34em; }
-  @media (max-width: 900px) { .hero-lead { margin-left: auto; margin-right: auto; text-align: left; } }
-  .hero-points { list-style: none; padding: 0; margin: 24px 0 0; display: flex; flex-wrap: wrap; gap: 10px 22px; }
-  .hero-points li { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #1e3a52; }
-  .hero-points li :global(svg) { color: #fff; background: var(--primary-2); border-radius: 50%; padding: 3px; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
-  .hero-visual { max-width: 600px; justify-self: end; width: 100%; }
-
-  /* Features */
-  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .feature { position: relative; display: flex; flex-direction: column; padding: 32px 28px 26px; transition: transform .25s, box-shadow .25s, border-color .25s; }
-  .feature:focus-within { border-color: var(--primary-2); }
-  .feature h3 a { color: var(--text); }
-  .feature h3 a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
-  .feature:hover h3 a { color: var(--primary); }
-  .feature p { flex: 1; }
-  .feature-more { display: inline-flex; align-items: center; gap: 4px; margin-top: 18px; font-size: 14.5px; font-weight: 600; color: var(--primary); }
-  .feature-more :global(svg) { transition: transform .2s; }
-  .feature:hover .feature-more :global(svg) { transform: translateX(3px); }
-  .feature:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-  .feature-icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 16px;
-    background: var(--soft); color: var(--primary); border: 1px solid var(--border); }
-  .feature h3 { font-size: 20px; margin-top: 20px; }
-  .feature p { color: var(--muted); margin-top: 8px; }
-
-  /* Pricing */
-  .plan-filter { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 36px; }
-  .filter-btn { min-height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--border); background: #fff; color: #334155;
-    font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; }
-  .filter-btn:hover { border-color: var(--primary-2); color: var(--primary); }
-  .filter-btn[aria-pressed='true'] { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 6px 16px rgba(0, 119, 182, .22); }
-  .plan-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-  .plan { position: relative; display: flex; flex-direction: column; padding: 26px 24px 24px; transition: transform .25s, box-shadow .25s, border-color .25s; }
-  .plan[hidden] { display: none; }
-  .plan:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #bfe0f5; }
-  .plan.featured { border: 2px solid var(--primary); padding: 25px 23px 23px; box-shadow: var(--shadow-lg); }
-  .plan-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 26px; }
-  .plan-cat { font-size: 13px; font-weight: 600; color: var(--primary); background: var(--soft); border: 1px solid var(--border); padding: 2px 10px; border-radius: 999px; }
-  .plan-badge { font-size: 12.5px; font-weight: 700; color: #fff; background: var(--primary); padding: 3px 10px; border-radius: 999px; }
-  .plan-name { font-size: 20px; margin-top: 16px; }
-  .plan-price { display: flex; align-items: baseline; gap: 2px; margin-top: 14px; color: var(--text); }
-  .plan-price .cur { font-size: 20px; font-weight: 700; color: var(--primary); }
-  .plan-price .num { font-size: 40px; font-weight: 800; color: var(--primary); line-height: 1; letter-spacing: -0.01em; }
-  .plan-price .bill { font-size: 15px; color: var(--muted); margin-left: 6px; }
-  .plan-traffic { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); font-size: 18px; font-weight: 700; }
-  .plan-hint { color: var(--muted); font-size: 14px; margin-top: 4px; flex: 1; }
-  .plan-btn { margin-top: 22px; width: 100%; }
-  .plan-note { text-align: center; color: var(--muted); font-size: 14.5px; margin-top: 28px; }
-
-  /* Guides */
-  .section-guides { background: linear-gradient(180deg, #fff 0%, var(--soft) 100%); }
-  .pill { display: inline-block; font-size: 13px; font-weight: 600; color: var(--primary); background: #fff; border: 1px solid var(--border); padding: 4px 14px; border-radius: 999px; margin-bottom: 16px; }
-  .guides-title span { color: var(--primary); background: linear-gradient(90deg, #0077b6, #0ea5e9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .guide-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-  .guide { position: relative; display: flex; flex-direction: column; padding: 22px 22px 18px; transition: transform .25s, box-shadow .25s, border-color .25s; }
-  .guide:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #9fd2ef; }
-  .guide:focus-within { border-color: var(--primary-2); }
-  .guide-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .guide-cat { font-size: 12.5px; font-weight: 700; color: var(--primary); background: var(--soft); border: 1px solid var(--border); padding: 2px 10px; border-radius: 999px; }
-  .guide-time { font-size: 13px; color: var(--muted); }
-  .guide h3 { font-size: 17px; margin-top: 14px; line-height: 1.5; }
-  .guide h3 a { color: var(--text); }
-  .guide h3 a::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
-  .guide h3 a:hover { color: var(--primary); }
-  .guide p { color: var(--muted); font-size: 14px; margin-top: 10px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .guide-more { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--primary); }
-  .guide:hover .guide-more :global(svg) { transform: translateX(3px); }
-  .guide-more :global(svg) { transition: transform .2s; }
-  .center-cta { display: flex; justify-content: center; margin-top: 40px; }
-
-  /* About */
-  .about { padding-top: 24px; }
-  .about-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
-  .about-copy h2 { font-size: clamp(26px, 3.2vw, 34px); }
-  .about-copy p { color: #475569; margin-top: 16px; font-size: 16.5px; line-height: 1.9; }
-  .about-copy strong { color: var(--text); }
-  .about-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 20px; font-weight: 600; }
-  .about-facts { margin: 0; padding: 8px 26px; }
-  .about-facts div { display: grid; grid-template-columns: 6em 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--border); }
-  .about-facts div:last-child { border-bottom: 0; }
-  .about-facts dt { color: var(--muted); font-size: 14.5px; }
-  .about-facts dd { margin: 0; font-weight: 600; font-size: 15px; }
-  @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 28px; } .about-facts { padding: 4px 18px; } }
-
-  /* Scenarios */
-  .scene-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .scene { display: flex; flex-direction: column; padding: 26px 24px 24px; transition: transform .25s, box-shadow .25s, border-color .25s; }
-  .scene:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #9fd2ef; }
-  .scene.featured { border: 2px solid var(--primary); padding: 25px 23px 23px; }
-  .scene-head { display: flex; align-items: center; gap: 12px; }
-  .scene-icon { flex-shrink: 0; display: inline-flex; width: 46px; height: 46px; border-radius: 14px; align-items: center; justify-content: center; background: var(--soft); border: 1px solid var(--border); color: var(--primary); }
-  .scene-head h3 { font-size: 18px; }
-  .scene-text { color: var(--muted); font-size: 14.5px; margin-top: 14px; flex: 1; }
-  .scene-plan { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: var(--soft); border: 1px solid var(--border); }
-  .scene-label { font-size: 12.5px; color: var(--muted); }
-  .scene-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-  .scene-row strong { font-size: 17px; }
-  .scene-price { margin-top: 4px; font-size: 14px; color: #334155; }
-  .scene-price span { font-size: 18px; font-weight: 800; color: var(--primary); }
-  .scene-note { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
-  .scene-btn { margin-top: 18px; width: 100%; }
-  .plan-note a { text-decoration: underline; text-underline-offset: 3px; }
-  @media (max-width: 1024px) { .scene-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 640px) { .scene-grid { grid-template-columns: 1fr; } }
-
-  /* Reviews */
-  .review-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .review { display: flex; flex-direction: column; padding: 26px 24px 22px; }
-  .stars { display: flex; gap: 3px; }
-  .star { fill: #f5b301; }
-  .star.off { fill: #d6ebfa; }
-  .review blockquote { margin: 14px 0 0; flex: 1; color: #334155; font-size: 15.5px; line-height: 1.8; }
-  .review-meta { display: flex; align-items: center; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
-  .avatar { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0284c7, #0077b6); color: #fff; font-weight: 700; flex-shrink: 0; }
-  .who { display: flex; flex-direction: column; line-height: 1.35; flex: 1; min-width: 0; }
-  .who strong { font-size: 15px; }
-  .who small { font-size: 12.5px; color: var(--primary); }
-  .review-meta time { font-size: 12.5px; color: var(--muted); }
-  @media (max-width: 1024px) { .review-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 640px) { .review-grid { grid-template-columns: 1fr; } }
-
-  /* FAQ */
-  .faq-wrap { max-width: 880px; }
-  .faq-list { display: grid; gap: 12px; }
-  .faq-item { border: 1px solid var(--border); border-radius: 14px; background: #fff; transition: box-shadow .2s, border-color .2s; }
-  .faq-item[open] { border-color: #bfe0f5; box-shadow: var(--shadow); }
-  .faq-item summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; cursor: pointer; min-height: 60px; border-radius: 14px; }
-  .faq-item summary::-webkit-details-marker { display: none; }
-  .faq-item summary h3 { font-size: 17px; font-weight: 600; }
-  .faq-icon { flex-shrink: 0; display: inline-flex; width: 32px; height: 32px; border-radius: 50%; align-items: center; justify-content: center; background: var(--soft); color: var(--primary); transition: transform .25s; }
-  .faq-item[open] .faq-icon { transform: rotate(45deg); }
-  .faq-a { padding: 0 22px 20px; color: #475569; }
-  .faq-cta { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 40px; padding: 28px 32px; background: linear-gradient(135deg, #f0f9ff, #fff); }
-  .faq-cta-title { font-size: 20px; font-weight: 700; }
-  .faq-cta-text { color: var(--muted); margin-top: 4px; }
-
-  @media (max-width: 1100px) {
-    .plan-grid, .guide-grid { grid-template-columns: repeat(2, 1fr); }
+  /* ---------- Hero ---------- */
+  .hero { position: relative; overflow: hidden; isolation: isolate; padding-top: 56px; }
+  .hero-sky {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(760px 520px at 76% 44%, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0) 70%),
+      radial-gradient(640px 360px at 8% -8%, rgba(109, 40, 217, 0.12), rgba(109, 40, 217, 0) 70%),
+      linear-gradient(180deg, #08060f 0%, var(--bg) 100%);
   }
-  @media (max-width: 900px) {
-    .hero { padding: 36px 0 56px; }
-    .hero-grid { grid-template-columns: 1fr; gap: 28px; }
-    .hero-copy { text-align: center; }
-    .hero-points, .hero-actions { justify-content: center; }
-    .hero-visual { justify-self: center; max-width: 520px; }
-    .feature-grid { grid-template-columns: 1fr; max-width: 560px; margin: 0 auto; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 12fr); align-items: center; gap: 24px; }
+  .hero-copy { position: relative; z-index: 1; padding: 32px 0 64px; }
+  /* Hero 换成紫色 logo 后，小标题跟着用淡紫 */
+  .hero-kicker { display: inline-flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; line-height: 1.4; letter-spacing: 0.24em; color: #c4b5fd; }
+  .hero-kicker .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #c4b5fd;
+    box-shadow: 0 0 0 3px rgba(196, 181, 253, 0.16), 0 0 12px 2px rgba(196, 181, 253, 0.6);
+  }
+  /* 标题上方给紫焰留出空间 */
+  .hero h1 { margin-top: clamp(30px, 3.4vw, 46px); }
+  .h1-name { display: block; font-size: var(--fs-display); line-height: 1.04; font-weight: 600; letter-spacing: 0.03em; color: #f6f2fd; }
+  .h1-tag { display: block; margin-top: 20px; font-size: clamp(22px, 2.3vw, 30px); font-weight: 400; line-height: 1.35; letter-spacing: 0.1em; color: var(--text-2); }
+  .h1-tag .accent { color: inherit; }
+  .hero-lead { margin-top: 28px; max-width: 34em; font-size: 16.5px; line-height: 1.9; color: var(--muted); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
+  .hero-actions .btn { min-height: 52px; padding: 0 28px; font-size: 16px; }
+  .hero-visual { position: relative; width: 116%; margin-right: -16%; }
+
+  /* 事实条：五条真实信息，发丝线分隔 */
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+  .facts li { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 0 24px; font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--text-2); }
+  .facts li:first-child { padding-left: 0; }
+  .facts li + li { border-left: 1px solid var(--line); }
+  .facts li :global(svg) { flex-shrink: 0; color: var(--accent-hi); }
+
+  /* ---------- Pricing ---------- */
+  .pricing-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px 48px; flex-wrap: wrap; margin-bottom: 40px; }
+  .pricing-top .section-head { margin-bottom: 0; }
+  .plan-filter { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: var(--r-sm); background: rgba(7, 5, 15, 0.6); }
+  .filter-btn {
+    min-height: 44px; padding: 0 18px; border-radius: var(--r-xs); border: 1px solid transparent; background: transparent; color: var(--muted);
+    font: inherit; font-size: 14.5px; font-weight: 500; line-height: 1; white-space: nowrap; cursor: pointer;
+    transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease);
+  }
+  .filter-btn:hover { color: var(--text); background: rgba(167, 139, 250, 0.06); }
+  .filter-btn[aria-pressed='true'] { color: #fff; background: rgba(139, 92, 246, 0.18); border-color: var(--accent-line); }
+
+  /* 横向滚动的套餐卡片：手机露出下一张的边，电脑约 3.5 张一屏 */
+  .rail { position: relative; }
+  .rail[hidden] { display: none !important; }
+  .rail-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .rail-hint { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); }
+  .rail-hint::before { content: ''; width: 18px; height: 1px; background: var(--accent-hi); opacity: .6; }
+  .rail-hint-mouse { display: none; }
+  @media (hover: hover) and (pointer: fine) { .rail-hint-touch { display: none; } .rail-hint-mouse { display: inline; } }
+  .rail:not(.is-scrollable) .rail-bar { visibility: hidden; }
+  .rail-nav { display: flex; gap: 8px; }
+  .rail-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0;
+    border-radius: 50%; border: 1px solid var(--line-2); background: rgba(17, 12, 32, 0.7); color: var(--text); cursor: pointer;
+    transition: border-color .2s var(--ease), background-color .2s var(--ease), color .2s var(--ease), opacity .2s var(--ease);
+  }
+  .rail-btn svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .rail-btn:hover:not(:disabled) { border-color: var(--accent-line); background: rgba(139, 92, 246, 0.16); color: #fff; }
+  .rail-btn:disabled { opacity: .35; cursor: default; }
+  .rail-btn:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 2px; }
+
+  .plan-grid {
+    list-style: none; margin: 0; padding: 2px 2px 6px;
+    display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 60px) / 3.5); gap: 20px; align-items: stretch;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .plan-grid::-webkit-scrollbar { display: none; }
+  .plan-grid:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 4px; border-radius: var(--r); }
+  .plan-grid.fade-r { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+  .plan-grid.fade-l { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px); mask-image: linear-gradient(90deg, transparent, #000 56px); }
+  .plan-grid.fade-l.fade-r { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); }
+  .plan-grid > li { scroll-snap-align: start; min-width: 0; }
+  .rail-track { position: relative; height: 2px; margin-top: 18px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .rail:not(.is-scrollable) .rail-track { visibility: hidden; }
+  .rail-thumb { position: absolute; left: 0; top: 0; bottom: 0; width: 30%; border-radius: 2px; background: var(--accent-hi); }
+  .plan { position: relative; display: flex; flex-direction: column; padding: 28px 24px 24px; transition: border-color .25s var(--ease), background-color .25s var(--ease); }
+  /* 筛选隐藏的卡片：必须压过各断点里的 display 设置 */
+  .plan[hidden] { display: none !important; }
+  .plan:hover { border-color: var(--line-2); }
+  .plan.featured {
+    border-color: var(--accent-line);
+    background:
+      radial-gradient(120% 60% at 50% 0%, rgba(139, 92, 246, 0.22), rgba(139, 92, 246, 0) 70%),
+      linear-gradient(180deg, rgba(22, 15, 43, 0.92), rgba(17, 12, 32, 0.92));
+  }
+  .plan.featured::before {
+    content: ''; position: absolute; left: 24px; right: 24px; top: -1px; height: 1px;
+    background: linear-gradient(90deg, rgba(196, 181, 253, 0), var(--accent-hi), rgba(196, 181, 253, 0));
+  }
+  .plan-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 24px; }
+  .plan-cat { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; color: var(--muted); }
+  .plan-badge {
+    font-size: 12px; font-weight: 600; line-height: 1.6; color: #fff; background: var(--accent-fill); padding: 1px 10px; border-radius: var(--r-xs);
+    box-shadow: 0 0 18px -4px rgba(139, 92, 246, 0.9);
+  }
+  .plan-name { margin-top: 16px; font-size: 19px; font-weight: 600; letter-spacing: 0.02em; line-height: 1.4; }
+  .plan-name small { margin-left: 8px; font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+  .plan-price { display: flex; align-items: baseline; margin-top: 20px; font-variant-numeric: tabular-nums; }
+  .plan-price .cur { align-self: flex-start; margin: 4px 4px 0 0; font-size: 20px; font-weight: 500; line-height: 1; color: var(--accent-hi); }
+  .plan-price .num { font-size: 52px; font-weight: 300; line-height: 1; letter-spacing: -0.02em; color: #f6f2fd; }
+  .plan-price .bill { margin-left: 10px; font-size: 14px; color: var(--muted); }
+  .plan-traffic { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 16px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* 月付 4 个周期的价格表 */
+  .cycles { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 14px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+  .cycles thead th { padding: 0 0 6px; font-size: 12px; font-weight: 500; letter-spacing: .02em; color: var(--muted); text-align: right; white-space: nowrap; }
+  .cycles thead th:first-child { text-align: left; }
+  .cycles tbody th, .cycles td { padding: 8px 0; border-top: 1px solid var(--line); white-space: nowrap; }
+  .cycles tbody th { text-align: left; font-weight: 500; color: var(--text-2); }
+  .cycles .off { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; font-size: 12px; font-weight: 600; line-height: 1.6; color: var(--accent-hi); background: rgba(139, 92, 246, 0.12); vertical-align: 1px; }
+  .cycles .c-total { padding-left: 8px; text-align: right; font-weight: 600; color: var(--text); }
+  .cycles .c-month { padding-left: 10px; text-align: right; color: var(--muted); }
+  .cycles .c-month small { font-size: 12px; }
+  .cycles tr.best th, .cycles tr.best .c-total { color: #fff; }
+  .cycles tr.best .c-month { color: var(--accent-hi); font-weight: 600; }
+  .plan-hint { flex: 1; margin-top: 4px; font-size: 14px; line-height: 1.7; color: var(--muted); }
+  .has-cycles .plan-hint { margin-top: 10px; color: var(--text-2); }
+  .plan-btn { width: 100%; margin-top: 24px; }
+
+  /* 至尊私人定制：在横向卡片下方单独一整行 */
+  .plan-custom {
+    margin-top: 20px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; gap: 24px 70px;
+    padding: 36px 24px; overflow: hidden; isolation: isolate;
+    background:
+      radial-gradient(70% 140% at 100% 50%, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0) 65%),
+      linear-gradient(180deg, rgba(22, 15, 43, 0.85), rgba(17, 12, 32, 0.85));
+  }
+  .pc-orbit { position: absolute; right: -60px; top: -20px; width: 640px; height: auto; z-index: -1; pointer-events: none; }
+  .pc-orbit ellipse { fill: none; stroke: var(--accent-hi); stroke-opacity: 0.16; stroke-width: 1; stroke-dasharray: 2 8; stroke-linecap: round; }
+  .pc-orbit ellipse + ellipse { stroke-opacity: 0.1; stroke-dasharray: none; }
+  .pc-main { grid-column: span 2; }
+  .pc-main .plan-name { margin-top: 12px; font-size: 22px; }
+  .pc-main .plan-hint { margin-top: 8px; font-size: 15px; color: var(--text-2); max-width: 30em; }
+  .pc-price { position: relative; }
+  .pc-price::before { content: ''; position: absolute; left: -35px; top: 2px; bottom: 2px; width: 1px; background: var(--line); }
+  .pc-price .plan-price { margin-top: 0; }
+  .pc-price .plan-traffic { margin-top: 10px; padding-top: 0; border-top: 0; font-size: 15px; font-weight: 500; color: var(--text-2); }
+  .pc-actions { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+  .pc-actions .plan-btn { margin-top: 0; }
+  .pc-more { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; font-size: 14.5px; font-weight: 600; }
+
+  .plan-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 40px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .plan-note { max-width: 44em; font-size: 14px; color: var(--muted); }
+  .plan-links { display: flex; flex-wrap: wrap; gap: 0 28px; }
+  .plan-links a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 14.5px; font-weight: 600; }
+  .plan-links a :global(svg), .about-link :global(svg), .faq-link :global(svg), .pc-more :global(svg) { transition: transform .25s var(--ease); }
+  .plan-links a:hover :global(svg), .about-link:hover :global(svg), .faq-link:hover :global(svg), .pc-more:hover :global(svg) { transform: translateX(3px); }
+
+  /* ---------- 服务说明：左文右规格表 ---------- */
+  .about-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; align-items: start; }
+  .about-copy h2 { font-size: var(--fs-h2); line-height: 1.2; }
+  .about-copy p { margin-top: 20px; font-size: 16.5px; line-height: 1.9; color: var(--muted); }
+  .about-copy strong { color: var(--text); }
+  .about-copy p a { padding: 10px 0; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(196, 181, 253, 0.4); }
+  .about-copy p a:hover { text-decoration-color: currentColor; }
+  .about-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 16px; font-weight: 600; }
+  .about-facts { margin: 0; padding: 8px 32px; }
+  .about-facts div { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 15px 0; border-bottom: 1px solid var(--line); }
+  .about-facts div:last-child { border-bottom: 0; }
+  .about-facts dt { font-size: 14px; color: var(--muted); }
+  .about-facts dd { margin: 0; font-size: 15.5px; font-weight: 500; color: var(--text); }
+
+  /* ---------- FAQ：左标题，右问答 ---------- */
+  .faq-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 32px 64px; align-items: start; }
+  .faq-grid .section-head { position: sticky; top: calc(var(--header-h) + 40px); margin: 0; }
+  .faq-list { border-top: 1px solid var(--line); }
+  .faq-item { border-bottom: 1px solid var(--line); }
+  .faq-item summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 68px; padding: 20px 0; cursor: pointer; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary h3 { font-size: 17px; font-weight: 500; line-height: 1.5; transition: color .2s var(--ease); }
+  .faq-item summary:hover h3 { color: #fff; }
+  .faq-icon {
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--line-2); color: var(--accent-hi); transition: transform .3s var(--ease), border-color .2s, background-color .2s;
+  }
+  .faq-item[open] .faq-icon { transform: rotate(45deg); border-color: var(--accent-line); background: var(--accent-tint); }
+  .faq-a { padding: 0 56px 24px 0; font-size: 15.5px; line-height: 1.85; color: var(--muted); }
+  .faq-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 4px; font-size: 15px; font-weight: 600; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1100px) {
+    .plan-grid { grid-auto-columns: calc((100% - 40px) / 2.4); }
+    .facts li { padding: 0 16px; font-size: 14px; gap: 10px; }
+    .plan-custom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pc-main { grid-column: 1 / -1; }
+    .pc-price::before { display: none; }
+  }
+  @media (max-width: 960px) {
+    .hero { padding-top: 32px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 0; }
+    .hero-copy { padding: 16px 0 8px; }
+    /* 窄屏：logo 徽标放到标题上方，一进来就能看到 */
+    .hero-visual { order: -1; width: 100%; max-width: 500px; margin: 0 auto -4%; }
+    .facts { grid-template-columns: 1fr 1fr; }
+    .facts li { min-height: 60px; padding: 0 0 0 16px; border-left: 0 !important; }
+    .facts li:nth-child(odd) { padding-left: 0; }
+    .facts li:nth-child(even) { border-left: 1px solid var(--line) !important; }
+    .facts li:nth-child(n + 3) { border-top: 1px solid var(--line); }
+    .facts li:last-child { grid-column: 1 / -1; }
+    .about-grid, .faq-grid { grid-template-columns: 1fr; gap: 40px; }
+    .faq-grid .section-head { position: static; }
+  }
+  @media (max-width: 760px) {
+    .plan-filter { display: flex; width: 100%; }
+    .filter-btn { flex: 1 1 auto; padding: 0 8px; font-size: 14px; }
+    .plan-custom { grid-template-columns: 1fr; gap: 20px; padding: 24px 20px; }
+    .pc-price { padding-top: 20px; border-top: 1px solid var(--line); }
+    .plan-links { flex-direction: column; }
+    .about-facts { padding: 4px 20px; }
+    .about-facts div { grid-template-columns: 5.5em minmax(0, 1fr); gap: 12px; }
+    .faq-a { padding-right: 0; }
   }
   @media (max-width: 640px) {
-    .plan-grid, .guide-grid { grid-template-columns: 1fr; }
-    .hero-actions .btn { flex: 1 1 100%; }
-    .faq-cta { flex-direction: column; align-items: stretch; text-align: center; padding: 24px; }
-    .faq-item summary { padding: 16px 18px; }
-    .faq-a { padding: 0 18px 18px; }
-    .plan-filter { gap: 8px; }
-    .filter-btn { padding: 0 16px; font-size: 14.5px; }
+    .h1-tag { margin-top: 14px; letter-spacing: 0.06em; }
+    .hero-lead { margin-top: 20px; font-size: 16px; }
+    .hero-actions { margin-top: 28px; }
+    .hero-actions .btn { flex: 1 1 140px; padding: 0 16px; }
+    /* 手机：卡片一张约占 82% 屏宽，露出下一张的边缘，提示可以左右滑 */
+    .rail { margin-inline: calc(var(--gutter) * -1); }
+    .rail-bar, .rail-track { margin-inline: var(--gutter); }
+    .rail-nav { display: none; }
+    .plan-grid { grid-auto-columns: min(82%, 340px); gap: 12px; padding: 2px var(--gutter) 6px; scroll-padding-inline: var(--gutter); }
+    .plan-grid.fade-l, .plan-grid.fade-r, .plan-grid.fade-l.fade-r { -webkit-mask-image: none; mask-image: none; }
+    .plan:not(.plan-custom) { padding: 22px 20px 20px; }
+    .plan-name small { display: block; margin: 2px 0 0; }
+    .plan-price .num { font-size: 44px; }
+    .plan-price .cur { font-size: 17px; margin-top: 2px; }
+    .plan-price .bill { margin-left: 6px; font-size: 13px; }
+    .plan-traffic { margin-top: 16px; padding-top: 14px; }
+    .plan-btn { margin-top: 16px; min-height: 46px; }
+    .faq-item summary { min-height: 60px; padding: 16px 0; gap: 16px; }
+    .faq-item summary h3 { font-size: 16px; }
+  }
+  @media (max-width: 380px) {
+    .plan-filter { gap: 2px; padding: 3px; }
+    .filter-btn { padding: 0 4px; font-size: 13.5px; }
   }
 </style>

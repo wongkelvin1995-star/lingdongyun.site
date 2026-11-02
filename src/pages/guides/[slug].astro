@@ -2,8 +2,11 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import Family from '../../components/Family.astro';
+import PlanTable from '../../components/PlanTable.astro';
 import Icon from '../../components/Icon.astro';
 import { SITE } from '../../data/site';
+import { ORG_REF, WEBSITE_REF, breadcrumbs, faqPage, planCatalog } from '../../data/jsonld';
 
 export async function getStaticPaths() {
   const all = await getCollection('guides');
@@ -19,82 +22,93 @@ const related = d.related
   .map((slug) => all.find((g) => g.id === slug))
   .filter((g): g is NonNullable<typeof g> => Boolean(g) && g!.id !== entry.id);
 
-const fmt = (s: string) => {
-  const [y, m, day] = s.split('-');
-  return `${y} 年 ${Number(m)} 月 ${Number(day)} 日`;
-};
-
 const jsonLd = [
   {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    '@type': 'Article',
+    '@id': `${url}#article`,
     headline: d.title,
     description: d.description,
     inLanguage: 'zh-CN',
     datePublished: d.published,
     dateModified: d.updated,
-    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    mainEntityOfPage: url,
     url,
     image: `${SITE.url}${SITE.ogImage}`,
-    keywords: d.keywords.join(', '),
     articleSection: d.category,
-    author: { '@type': 'Organization', name: SITE.brand, url: `${SITE.url}/` },
-    publisher: { '@type': 'Organization', name: SITE.brand, url: `${SITE.url}/`, logo: { '@type': 'ImageObject', url: `${SITE.url}/logo-512.png` } },
-    citation: d.sources.map((s) => s.url),
+    author: ORG_REF,
+    publisher: ORG_REF,
+    isPartOf: WEBSITE_REF,
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: '首页', item: `${SITE.url}/` },
-      { '@type': 'ListItem', position: 2, name: '使用指南', item: `${SITE.url}/guides/` },
-      { '@type': 'ListItem', position: 3, name: d.title, item: url },
-    ],
-  },
+  breadcrumbs([
+    { name: '首页', path: '/' },
+    { name: '官网资料', path: '/guides/' },
+    { name: d.short, path },
+  ]),
+  ...(d.planTable ? [planCatalog(url)] : []),
+  ...(d.faqs.length ? [faqPage(url, d.faqs)] : []),
 ];
 ---
 <Base title={d.seoTitle} description={d.description} path={path} ogType="article" jsonLd={jsonLd} article={{ published: d.published, updated: d.updated }}>
   <div class="article-hero">
+    <svg class="a-orbit" viewBox="0 0 560 300" aria-hidden="true" focusable="false">
+      <ellipse cx="300" cy="150" rx="250" ry="64" transform="rotate(-14 300 150)" />
+      <ellipse cx="300" cy="150" rx="170" ry="40" transform="rotate(-14 300 150)" />
+    </svg>
     <div class="container narrow">
-      <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '使用指南', href: '/guides/' }, { name: d.title }]} />
+      <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '官网资料', href: '/guides/' }, { name: d.short }]} />
       <span class="a-cat">{d.category}</span>
       <h1>{d.title}</h1>
       <p class="a-meta">
-        <span>作者：{SITE.brand}</span>
-        <span>发布：<time datetime={d.published}>{fmt(d.published)}</time></span>
-        <span>更新：<time datetime={d.updated}>{fmt(d.updated)}</time></span>
+        <span>{SITE.name}</span>
+        <span>发布于 <time datetime={d.published}>{d.published}</time></span>
+        <span>更新于 <time datetime={d.updated}>{d.updated}</time></span>
       </p>
     </div>
   </div>
 
   <div class="container narrow">
     <article class="prose" data-article-body>
+      {d.lead && <p class="lead">{d.lead}</p>}
+      {d.family && <Family variant="rows" showMore={false} />}
+      {d.planTable && <PlanTable />}
       <Content />
+      {d.faqs.length > 0 && (
+        <section class="a-faq" aria-labelledby="faq">
+          <h2 id="faq">常见问题</h2>
+          {d.faqs.map((f) => (
+            <div class="qa">
+              <h3>{f.q}</h3>
+              <p>{f.a}</p>
+            </div>
+          ))}
+        </section>
+      )}
     </article>
 
-    <section class="sources" aria-labelledby="src-title">
-      <h2 id="src-title">参考来源</h2>
-      <ul>
-        {d.sources.map((s) => <li><a href={s.url} target="_blank" rel="noopener">{s.title}</a></li>)}
-      </ul>
-      <p class="src-note">本文基于上述公开资料与一般使用经验整理，不包含实测数据；客户端界面可能随版本变化，请以官方文档为准。</p>
-    </section>
-
-    <section class="related" aria-labelledby="rel-title">
-      <h2 id="rel-title">相关阅读</h2>
-      <ul>
-        {related.map((g) => (
-          <li class="card">
-            <span class="r-cat">{g.data.category}</span>
-            <a href={`/guides/${g.id}/`}>{g.data.title}</a>
-            <p>{g.data.excerpt}</p>
-          </li>
-        ))}
-      </ul>
-    </section>
+    {(related.length > 0 || d.more.length > 0) && (
+      <section class="related" aria-labelledby="rel-title">
+        <h2 id="rel-title">相关阅读</h2>
+        <ul>
+          {related.map((g) => (
+            <li class="card">
+              <span class="r-cat">官网资料</span>
+              <a href={`/guides/${g.id}/`}>{g.data.title}</a>
+              <p>{g.data.excerpt}</p>
+            </li>
+          ))}
+          {d.more.map((m) => (
+            <li class="card">
+              <span class="r-cat">{m.label}</span>
+              <a href={m.url}>{m.title}</a>
+              <p>{m.note}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     <nav class="a-nav" aria-label="文章底部导航">
-      <a class="btn btn-outline" href="/guides/"><Icon name="book" size={18} />返回文章列表</a>
+      <a class="btn btn-outline" href="/guides/"><Icon name="book" size={18} />返回官网资料</a>
       <a class="btn btn-outline" href="/">返回首页</a>
       <a class="btn btn-primary" href="/#pricing">查看套餐<Icon name="arrow" size={18} /></a>
     </nav>
@@ -103,47 +117,82 @@ const jsonLd = [
 
 <style>
   .narrow { max-width: calc(800px + var(--gutter) * 2); }
-  .article-hero { background: linear-gradient(180deg, var(--soft), #fff); padding: 36px 0 32px; border-bottom: 1px solid #e8f3fb; }
-  .a-cat { display: inline-block; margin-top: 24px; font-size: 13px; font-weight: 700; color: var(--primary); background: #fff; border: 1px solid var(--border); padding: 3px 12px; border-radius: 999px; }
-  .article-hero h1 { font-size: clamp(26px, 3.6vw, 38px); margin-top: 14px; line-height: 1.35; }
-  .a-meta { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 16px; color: var(--muted); font-size: 14px; }
 
-  .prose { padding: 40px 0 8px; font-size: 17px; line-height: 1.9; color: #1e293b; overflow-wrap: anywhere; }
-  .prose :global(p) { margin: 0 0 1.1em; }
-  .prose :global(h2) { font-size: 24px; margin: 1.9em 0 0.7em; padding-left: 14px; border-left: 4px solid var(--primary); line-height: 1.4; }
-  .prose :global(h3) { font-size: 19px; margin: 1.5em 0 0.5em; }
-  .prose :global(ul), .prose :global(ol) { padding-left: 1.4em; margin: 0 0 1.2em; }
-  .prose :global(li) { margin: 0.35em 0; }
-  .prose :global(a) { color: var(--primary); text-decoration: underline; text-decoration-color: #9fd2ef; text-underline-offset: 3px; }
-  .prose :global(a:hover) { text-decoration-color: var(--primary); }
+  /* 文章头：夜空底 + 左上一束蓝光 */
+  .article-hero {
+    position: relative; overflow: hidden; isolation: isolate; padding: 32px 0 48px; border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(640px 320px at 12% -20%, rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0) 70%),
+      linear-gradient(180deg, #08060f 0%, var(--bg) 100%);
+  }
+  .a-orbit { position: absolute; right: -120px; top: -60px; width: 560px; height: auto; z-index: -1; pointer-events: none; }
+  .a-orbit ellipse { fill: none; stroke: var(--accent-hi); stroke-width: 1; stroke-opacity: 0.14; }
+  .a-orbit ellipse:first-child { stroke-dasharray: 2 8; stroke-linecap: round; stroke-opacity: 0.22; }
+  .a-cat {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; line-height: 1.6;
+    color: var(--accent-hi); border: 1px solid var(--accent-line); background: rgba(139, 92, 246, 0.08); padding: 3px 12px; border-radius: var(--r-xs);
+  }
+  .article-hero h1 { margin-top: 18px; font-size: clamp(28px, 3.6vw, 42px); line-height: 1.3; letter-spacing: 0.01em; }
+  /* 元信息之间的竖线：每一项的竖线画在自身左侧 15px 处，行首那一项的竖线落在容器外被裁掉，换行时不会出现孤立的分隔线 */
+  .a-meta { display: flex; flex-wrap: wrap; row-gap: 4px; overflow: hidden; margin-top: 20px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .a-meta span { position: relative; margin-left: -15px; padding: 0 29px 0 15px; }
+  .a-meta span::before { content: ''; position: absolute; left: 0; top: 50%; width: 1px; height: 12px; margin-top: -6px; background: var(--line-2); }
+
+  /* 正文：舒适的行长与行距，标题之间用发丝线分节 */
+  .prose { padding: 48px 0 8px; font-size: 17px; line-height: 1.9; color: var(--text-2); overflow-wrap: anywhere; }
+  .prose :global(p) { margin: 0 0 1.15em; }
+  .prose .lead {
+    margin-bottom: 1.6em; padding: 22px 26px; font-size: 18px; line-height: 1.85; color: var(--text);
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.04));
+    border: 1px solid rgba(196, 181, 253, 0.22); border-radius: var(--r);
+  }
+  .prose :global(h2) {
+    margin: 2.2em 0 0.8em; padding-top: 1.3em; border-top: 1px solid var(--line);
+    font-size: 25px; line-height: 1.4; scroll-margin-top: 96px;
+  }
+  .prose :global(h3) { margin: 1.7em 0 0.55em; font-size: 19px; line-height: 1.5; scroll-margin-top: 96px; }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.3em; margin: 0 0 1.2em; }
+  .prose :global(li) { margin: 0.4em 0; padding-left: 0.2em; }
+  .prose :global(li::marker) { color: var(--accent-hi); }
+  .prose :global(a) { color: var(--accent-hi); text-decoration: underline; text-decoration-color: rgba(196, 181, 253, 0.4); text-underline-offset: 4px; }
+  .prose :global(a:hover) { color: var(--accent-hi-2); text-decoration-color: currentColor; }
   .prose :global(strong) { color: var(--text); }
-  .prose :global(blockquote) { margin: 0 0 1.3em; padding: 16px 20px; background: var(--soft); border: 1px solid var(--border); border-radius: 12px; color: #1e3a52; }
+  .prose :global(blockquote) {
+    margin: 0 0 1.4em; padding: 16px 22px; color: var(--text);
+    background: rgba(139, 92, 246, 0.07); border: 1px solid rgba(196, 181, 253, 0.18); border-left: 2px solid var(--accent); border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  }
   .prose :global(blockquote p:last-child) { margin-bottom: 0; }
-  .prose :global(table) { width: 100%; border-collapse: collapse; margin: 0 0 1.3em; font-size: 15px; display: block; overflow-x: auto; }
-  .prose :global(th), .prose :global(td) { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
-  .prose :global(th) { background: var(--soft); white-space: nowrap; }
-  .prose :global(.summary) { background: var(--soft); }
+  .prose :global(table) { width: 100%; border-collapse: collapse; margin: 0 0 1.4em; font-size: 15px; display: block; overflow-x: auto; font-variant-numeric: tabular-nums; }
+  .prose :global(th), .prose :global(td) { border: 1px solid var(--line); padding: 10px 14px; text-align: left; vertical-align: top; }
+  .prose :global(th) { background: rgba(167, 139, 250, 0.06); color: var(--text); font-weight: 600; white-space: nowrap; }
+  .prose :global(code) { font-size: 0.92em; padding: 2px 6px; border-radius: var(--r-xs); background: rgba(167, 139, 250, 0.1); color: var(--text); }
+  .prose :global(hr) { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
 
-  .sources { margin-top: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 14px; }
-  .sources h2, .related h2 { font-size: 20px; }
-  .sources ul { margin: 12px 0 0; padding-left: 1.2em; }
-  .sources li { margin: 6px 0; overflow-wrap: anywhere; }
-  .src-note { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .a-faq .qa { padding: 4px 0 6px; border-bottom: 1px solid var(--line); }
+  .a-faq .qa:last-child { border-bottom: 0; }
+  .a-faq h3 { margin-top: 1.1em; font-size: 17.5px; color: var(--text); }
 
-  .related { margin-top: 48px; }
-  .related ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .related li { padding: 20px; display: flex; flex-direction: column; }
-  .r-cat { font-size: 12.5px; font-weight: 700; color: var(--primary); }
-  .related a { color: var(--text); font-weight: 700; margin-top: 8px; line-height: 1.5; }
-  .related a:hover { color: var(--primary); }
-  .related p { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  .related { margin-top: 56px; }
+  .related h2 { font-size: 20px; }
+  .related ul { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .related li { position: relative; display: flex; flex-direction: column; padding: 22px; transition: border-color .25s var(--ease), background-color .25s var(--ease); }
+  .related li:hover { border-color: var(--accent-line); }
+  .r-cat { font-size: 12.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--accent-hi); }
+  .related a { margin-top: 10px; font-weight: 600; line-height: 1.55; color: var(--text); }
+  .related a::after { content: ''; position: absolute; inset: 0; border-radius: var(--r); }
+  .related a:hover { color: #fff; }
+  .related p { margin-top: 8px; font-size: 14px; line-height: 1.7; color: var(--muted); }
 
-  .a-nav { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 48px 0 80px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .a-nav { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 56px 0 96px; padding-top: 32px; border-top: 1px solid var(--line); }
 
   @media (max-width: 760px) {
+    .article-hero { padding: 20px 0 36px; }
+    .a-orbit { width: 380px; right: -170px; top: -40px; }
     .related ul { grid-template-columns: 1fr; }
-    .prose { font-size: 16.5px; }
+    .prose { padding-top: 32px; font-size: 16.5px; }
+    .prose .lead { padding: 18px 18px; font-size: 17px; }
     .prose :global(h2) { font-size: 21px; }
+    .a-nav { margin-bottom: 72px; }
     .a-nav .btn { flex: 1 1 100%; }
   }
 </style>

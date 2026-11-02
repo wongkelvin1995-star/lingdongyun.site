@@ -1,0 +1,75 @@
+---
+// 出场动态（五站共用，由 tools/motion.py 生成，勿手改）
+---
+<script is:inline>(function(){var d=document.documentElement;try{var n=navigator,u=n.userAgent||'';
+if(n.webdriver||/bot|crawl|spider|slurp|bing|google|baidu|yandex|sogou|bytespider|petalbot|lighthouse|headless/i.test(u))return;
+if(!('IntersectionObserver' in window)||!d.animate||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+d.classList.add('ldy-motion');var seen=false,ref='';try{seen=sessionStorage.getItem('ldy-intro')==='1'}catch(e){}
+try{ref=document.referrer?new URL(document.referrer).hostname:''}catch(e){}
+if(!seen&&!/(^|\.)lingdongyun\.(site|website|best|lol|sbs)$/.test(ref)){d.classList.add('ldy-intro');try{sessionStorage.setItem('ldy-intro','1')}catch(e){}
+setTimeout(function(){d.classList.remove('ldy-intro')},2900)}
+addEventListener('load',function(){setTimeout(function(){if(!d.classList.contains('ldy-rv-ok'))d.classList.remove('ldy-motion')},1500)})
+}catch(e){d.classList.remove('ldy-motion','ldy-intro')}})();</script><style is:global>/* 出场动态（五站共用，源文件 tools/motion.py，勿单独修改） */
+@keyframes ldy-up{from{opacity:0;translate:0 22px}}
+@keyframes ldy-visual{from{opacity:0;scale:.94}}
+@keyframes ldy-side{from{opacity:0;translate:40px 0}}
+@keyframes ldy-card{from{opacity:0;translate:0 18px;scale:.985}}
+html.ldy-motion .hero-kicker{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 0ms both}
+html.ldy-motion .hero h1 .h1-name{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 80ms both}
+html.ldy-motion .hero h1 .h1-tag{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 200ms both}
+html.ldy-motion .hero-lead{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 320ms both}
+html.ldy-motion .hero-actions{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 440ms both}
+html.ldy-motion .hero .facts li:nth-of-type(1){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 560ms both}
+html.ldy-motion .hero .facts li:nth-of-type(2){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 630ms both}
+html.ldy-motion .hero .facts li:nth-of-type(3){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 700ms both}
+html.ldy-motion .hero .facts li:nth-of-type(4){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 770ms both}
+html.ldy-motion .hero .facts li:nth-of-type(5){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 840ms both}
+html.ldy-motion .hero .facts li:nth-of-type(6){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 910ms both}
+html.ldy-motion .article-hero .breadcrumb{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 0ms both}
+html.ldy-motion .article-hero .a-cat{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 70ms both}
+html.ldy-motion .article-hero h1{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 140ms both}
+html.ldy-motion .article-hero .a-meta{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 240ms both}
+html.ldy-motion article.prose > .lead{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 320ms both}
+html.ldy-motion .list-hero .container > :nth-child(1){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 0ms both}
+html.ldy-motion .list-hero .container > :nth-child(2){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 90ms both}
+html.ldy-motion .list-hero .container > :nth-child(3){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 180ms both}
+html.ldy-motion .list-hero .container > :nth-child(4){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 270ms both}
+html.ldy-motion .list-hero .container > :nth-child(5){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 360ms both}
+html.ldy-motion .sm > h1{animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 0ms both}
+html.ldy-motion .sm > p:nth-of-type(1){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 100ms both}
+html.ldy-motion .sm > p:nth-of-type(2){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 180ms both}
+html.ldy-motion .sm > p:nth-of-type(3){animation:ldy-up 1000ms cubic-bezier(.16,1,.3,1) 260ms both}
+html.ldy-intro :is(.hero-kicker, .hero h1 .h1-name, .hero h1 .h1-tag, .hero-lead, .hero-actions, .hero .facts li, .article-hero .breadcrumb, .article-hero .a-cat, .article-hero h1, .article-hero .a-meta, article.prose > .lead, .list-hero .container > *, .sm > h1, .sm > p){animation-play-state:paused}
+html.ldy-motion :is(.section-head, .plan-filter, .rail-bar, .plan-grid > .plan, .plan-custom, .plan-foot, .about-copy, .about-facts, .family-head, .family-item, .family-more, .faq-item, .plan-table, .a-faq, .related li, .a-nav, .list-body > *, .list-cta, .cols > section, .footer-cta):not(.ldy-in){opacity:0}
+@media print{html.ldy-motion :is(.section-head, .plan-filter, .rail-bar, .plan-grid > .plan, .plan-custom, .plan-foot, .about-copy, .about-facts, .family-head, .family-item, .family-more, .faq-item, .plan-table, .a-faq, .related li, .a-nav, .list-body > *, .list-cta, .cols > section, .footer-cta){opacity:1!important}html.ldy-motion *{animation:none!important}.ldy-ov{display:none!important}}
+.ldy-ov{position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;background:#07050F;color:#F1ECFF;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);font-family:"PingFang SC","HarmonyOS Sans SC","MiSans","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;transition:opacity .42s cubic-bezier(.4,0,.2,1),visibility 0s linear .42s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ldy-ov.out{opacity:0;visibility:hidden;pointer-events:none}.ldy-ov.fast{transition-duration:.22s,0s;transition-delay:0s,.22s}
+.ldy-ov__stage{position:relative;display:grid;justify-items:center;gap:22px;transition:scale .46s cubic-bezier(.4,0,.2,1)}.ldy-ov.out .ldy-ov__stage{scale:1.05}
+.ldy-ov__mark{position:relative;width:300px;max-width:76vw;margin-bottom:-22px}
+.ldy-ov__emblem{display:block;width:100%;height:auto;max-width:none;max-height:none;overflow:visible}
+.ldy-ov__emblem :is(.ldy-ov__glow,.ldy-ov__globe,.ldy-ov__flames,.ldy-ov__flash,.ldy-ov__star,.ldy-ov__tongue){transform-box:fill-box}.ldy-ov__emblem :is(.ldy-ov__glow,.ldy-ov__globe,.ldy-ov__flash,.ldy-ov__star){transform-origin:50% 50%}
+.ldy-ov__glow{opacity:.6;animation:ldy-ov-glow .9s cubic-bezier(.16,1,.3,1) both}
+.ldy-ov__globe{animation:ldy-ov-sphere .62s cubic-bezier(.2,.8,.2,1) both}
+.ldy-ov__orbit{fill:none;stroke-width:1.5;stroke-opacity:.75;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;animation:ldy-ov-ring .8s cubic-bezier(.65,0,.35,1) .1s forwards}
+.ldy-ov__comet{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-dasharray:12 88;stroke-dashoffset:100;opacity:0;animation:ldy-ov-comet 1s cubic-bezier(.45,0,.25,1) .16s forwards}
+.ldy-ov__star{animation:ldy-ov-star .78s cubic-bezier(.2,.8,.2,1) .3s both}
+.ldy-ov__flash{opacity:0;animation:ldy-ov-flash .7s ease-out .72s both}
+.ldy-ov__emblem .ldy-ov__flames{transform-origin:20% 100%;animation:ldy-ov-ignite .55s cubic-bezier(.2,.9,.3,1.3) .66s both}
+.ldy-ov__fglow{opacity:.7}.ldy-ov__emblem .ldy-ov__tongue{fill:url(#ldy-ov-tg);transform-origin:50% 100%;animation:ldy-ov-flick .42s ease-in-out infinite alternate}
+.ldy-ov__tongue.t1{animation-duration:.36s;animation-delay:-.1s}.ldy-ov__tongue.t2{animation-duration:.48s;animation-delay:-.2s}.ldy-ov__tongue.t3{animation-duration:.39s;animation-delay:-.3s}.ldy-ov__tongue.t4{animation-duration:.45s;animation-delay:-.05s}
+.ldy-ov__words{display:grid;justify-items:center;gap:6px;text-align:center}
+.ldy-ov__name{font-size:26px;font-weight:700;letter-spacing:.18em;padding-left:.18em;animation:ldy-ov-name .7s cubic-bezier(.16,1,.3,1) .5s both}
+.ldy-ov__sub{font-size:13px;font-weight:500;letter-spacing:.32em;padding-left:.32em;color:#8B5CF6;animation:ldy-ov-fade .6s ease .64s both}.ldy-ov__sub.latin{font-size:11.5px;letter-spacing:.42em;padding-left:.42em}
+.ldy-ov__leave{font-size:17px;font-weight:600;letter-spacing:.22em;padding-left:.22em;color:#F1ECFF;animation:ldy-ov-fade .5s ease .3s both}.ldy-ov__dots{display:inline-flex;gap:.3em;margin-left:.45em;vertical-align:.1em}.ldy-ov__dots i{width:.3em;height:.3em;border-radius:50%;background:#8B5CF6;animation:ldy-ov-dot 1s ease-in-out infinite both}.ldy-ov__dots i:nth-child(2){animation-delay:.15s}.ldy-ov__dots i:nth-child(3){animation-delay:.3s}@keyframes ldy-ov-dot{0%,80%,100%{opacity:.25;scale:.8}40%{opacity:1;scale:1.15}}.ldy-lv{animation:ldy-lv-in .18s ease both}@keyframes ldy-lv-in{from{opacity:0}}
+@keyframes ldy-ov-glow{from{opacity:0;scale:.4}}
+@keyframes ldy-ov-sphere{0%{opacity:0;scale:.35}60%{opacity:1;scale:1.06}100%{opacity:1;scale:1}}
+@keyframes ldy-ov-star{0%{opacity:0;scale:.2;rotate:-45deg}60%{opacity:1;scale:1.12;rotate:6deg}80%{scale:.96;rotate:-2deg}100%{opacity:1;scale:1;rotate:0deg}}
+@keyframes ldy-ov-flash{0%{opacity:0;scale:.3}35%{opacity:.9}100%{opacity:0;scale:1.6}}
+@keyframes ldy-ov-ignite{from{opacity:0;scale:.2}}
+@keyframes ldy-ov-flick{from{scale:1 .78}to{scale:.94 1.08}}
+@keyframes ldy-ov-ring{to{stroke-dashoffset:0}}
+@keyframes ldy-ov-comet{0%{opacity:0;stroke-dashoffset:100}15%{opacity:1}85%{opacity:1}100%{opacity:0;stroke-dashoffset:-60}}
+@keyframes ldy-ov-name{from{opacity:0;letter-spacing:.5em;padding-left:.5em}}
+@keyframes ldy-ov-fade{from{opacity:0;translate:0 6px}}
+.ldy-ov{background:radial-gradient(50vmax 40vmax at 50% 45%,rgba(124,58,237,.2),transparent 70%),#07050F}
+@media (prefers-reduced-motion:reduce){.ldy-ov{display:none!important}}</style>

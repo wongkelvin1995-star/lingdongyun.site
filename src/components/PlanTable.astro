@@ -1,0 +1,105 @@
+---
+// 9 档套餐完整价格表（套餐价格与服务说明页使用），数据来自 src/data/site.ts
+import { PLANS, PLAN_NOTE, SITE, planFullName, perMonth, saving, yuan } from '../data/site';
+
+const monthly = PLANS.filter((p) => p.cycles);
+const CYCLE_LABELS = ['月付', '季付', '半年付', '年付'] as const;
+---
+<section class="plan-table" aria-labelledby="plans">
+  <h2 id="plans">9 档套餐价格一览</h2>
+  <div class="pt-wrap">
+    <table>
+      <thead>
+        <tr><th scope="col">套餐</th><th scope="col">类型</th><th scope="col">价格</th><th scope="col">流量</th><th scope="col">有效期 / 重置</th></tr>
+      </thead>
+      <tbody>
+        {PLANS.map((p) => (
+          <tr>
+            <th scope="row">{planFullName(p)}{p.badge && <span class="pt-badge">{p.badge}</span>}</th>
+            <td data-label="类型">{p.type}</td>
+            <td data-label="价格" class="pt-price">{p.priceText}</td>
+            <td data-label="流量">{p.trafficFull ?? p.traffic}</td>
+            <td data-label="有效期">{p.validity}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <h3 class="cy-title" id="cycles">月付套餐四个付款周期的价格</h3>
+  <p class="cy-lead">四档月付套餐都可以按月付、季付、半年付或年付购买，周期越长越便宜：季付 95 折，半年付 9 折，年付 85 折。每格下方是折合每月的价格。</p>
+  <div class="pt-wrap cy-wrap">
+    <table class="cy-table">
+      <thead>
+        <tr><th scope="col">套餐</th>{CYCLE_LABELS.map((l) => <th scope="col">{l}</th>)}</tr>
+      </thead>
+      <tbody>
+        {monthly.map((p) => (
+          <tr>
+            <th scope="row">{p.name}<span class="cy-traffic">{p.traffic}</span></th>
+            {p.cycles!.map((c) => (
+              <td data-label={c.off ? `${c.label}（${c.off}）` : c.label} class:list={{ 'cy-best': c.months === 12 }}>
+                <span class="cy-total">¥{yuan(c.price)}</span>
+                <span class="cy-month">{c.months === 1 ? '按月续费' : `折合 ¥${yuan(perMonth(c))}/月`}</span>
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="pt-note">年付和按月付同样用满一年相比：灵动·拂风省 ¥{yuan(saving(monthly[0], monthly[0].cycles![3]))}，灵动·驭浪省 ¥{yuan(saving(monthly[1], monthly[1].cycles![3]))}，灵动·破晓省 ¥{yuan(saving(monthly[2], monthly[2].cycles![3]))}，灵动·凌霄省 ¥{yuan(saving(monthly[3], monthly[3].cycles![3]))}。</p>
+  <p class="pt-note">{PLAN_NOTE}<a href={SITE.registerUrl} target="_blank" rel="noopener">登录用户中心查看</a></p>
+</section>
+
+<style>
+  .plan-table h2 { margin-top: .4em !important; padding-top: 0 !important; border-top: 0 !important; }
+  .pt-wrap { margin: 0 0 14px; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: rgba(17, 12, 32, 0.6); }
+  .plan-table table { display: table !important; width: 100%; margin: 0 !important; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .plan-table th, .plan-table td { border: 0 !important; border-bottom: 1px solid var(--line) !important; padding: 13px 16px !important; text-align: left; vertical-align: middle; }
+  .plan-table thead th { background: rgba(167, 139, 250, 0.06) !important; font-size: 13.5px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+  .plan-table tbody tr:last-child th, .plan-table tbody tr:last-child td { border-bottom: 0 !important; }
+  .plan-table tbody tr { transition: background-color .2s var(--ease); }
+  .plan-table tbody tr:hover { background: rgba(139, 92, 246, 0.05); }
+  .plan-table tbody th { background: transparent !important; font-weight: 600; color: var(--text); white-space: normal !important; }
+  .plan-table td { color: var(--text-2); }
+  .pt-price { font-weight: 600; color: var(--text) !important; white-space: nowrap; }
+  .pt-badge {
+    display: inline-block; margin-left: 8px; padding: 0 8px; border-radius: var(--r-xs); vertical-align: 2px;
+    font-size: 12px; font-weight: 600; line-height: 1.6; color: #fff; background: var(--accent-fill);
+  }
+  /* 宽屏：套餐名、类型、价格、流量各占一行，让“有效期”一列承担换行 */
+  @media (min-width: 900px) {
+    .plan-table tbody th, .plan-table td[data-label='类型'], .plan-table td[data-label='流量'] { white-space: nowrap !important; }
+  }
+  .pt-note { font-size: 15px; color: var(--muted); }
+  .pt-note a { margin-left: 4px; padding: 10px 0; }
+
+  /* 手机：每档套餐一张小卡片，不需要横向滚动 */
+  @media (max-width: 640px) {
+    .pt-wrap { border: 0; border-radius: 0; overflow: visible; background: transparent; }
+    .plan-table table, .plan-table tbody { display: block !important; }
+    .plan-table thead { display: none; }
+    .plan-table tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-bottom: 10px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-sm); background: rgba(17, 12, 32, 0.7); }
+    .plan-table tbody th { grid-column: 1 / -1; padding: 0 0 4px !important; border: 0 !important; font-size: 16px; }
+    .plan-table td { padding: 0 !important; border: 0 !important; font-size: 14.5px; line-height: 1.6; }
+    .plan-table td::before { content: attr(data-label) '：'; color: var(--muted); font-weight: 400; }
+    .pt-price { white-space: normal; }
+  }
+
+  /* 月付 4 个周期价格表 */
+  .cy-title { margin: 36px 0 8px !important; font-size: 19px !important; }
+  .cy-lead { margin: 0 0 14px !important; font-size: 15px; color: var(--muted); }
+  .cy-table th, .cy-table td { white-space: nowrap; }
+  .cy-table thead th:not(:first-child), .cy-table td { text-align: right !important; }
+  .cy-traffic { display: block; margin-top: 2px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .cy-total { display: block; font-weight: 600; color: var(--text); }
+  .cy-month { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .cy-best .cy-month { color: var(--accent-hi); font-weight: 600; }
+  @media (max-width: 640px) {
+    .cy-table tbody tr { grid-template-columns: 1fr 1fr; }
+    .cy-table td { text-align: left !important; }
+    .cy-table td::before { display: block; content: attr(data-label); font-size: 13px; }
+    .cy-total, .cy-month { display: inline; }
+    .cy-month { margin-left: 6px; }
+  }
+</style>
