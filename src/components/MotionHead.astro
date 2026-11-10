@@ -1,15 +1,15 @@
 ---
-// 出场动态（五站共用，由 tools/motion.py 生成，勿手改）
+// 出场动态（由 tools/motion.py 生成，勿手改）
 ---
 <script is:inline>(function(){var d=document.documentElement;try{var n=navigator,u=n.userAgent||'';
 if(n.webdriver||/bot|crawl|spider|slurp|bing|google|baidu|yandex|sogou|bytespider|petalbot|lighthouse|headless/i.test(u))return;
 if(!('IntersectionObserver' in window)||!d.animate||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
 d.classList.add('ldy-motion');var seen=false,ref='';try{seen=sessionStorage.getItem('ldy-intro')==='1'}catch(e){}
 try{ref=document.referrer?new URL(document.referrer).hostname:''}catch(e){}
-if(!seen&&!/(^|\.)lingdongyun\.(site|website|best|lol|sbs)$/.test(ref)){d.classList.add('ldy-intro');try{sessionStorage.setItem('ldy-intro','1')}catch(e){}
+if(!seen&&!/(^|\.)lingdongyun\.site$/.test(ref)){d.classList.add('ldy-intro');try{sessionStorage.setItem('ldy-intro','1')}catch(e){}
 setTimeout(function(){d.classList.remove('ldy-intro')},2900)}
 addEventListener('load',function(){setTimeout(function(){if(!d.classList.contains('ldy-rv-ok'))d.classList.remove('ldy-motion')},1500)})
-}catch(e){d.classList.remove('ldy-motion','ldy-intro')}})();</script><style is:global>/* 出场动态（五站共用，源文件 tools/motion.py，勿单独修改） */
+}catch(e){d.classList.remove('ldy-motion','ldy-intro')}})();</script><style is:global>/* 出场动态（源文件 tools/motion.py，勿单独修改） */
 @keyframes ldy-up{from{opacity:0;translate:0 22px}}
 @keyframes ldy-visual{from{opacity:0;scale:.94}}
 @keyframes ldy-side{from{opacity:0;translate:40px 0}}

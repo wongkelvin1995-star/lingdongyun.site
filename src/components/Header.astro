@@ -2,7 +2,7 @@
 import Logo from './Logo.astro';
 import { NAV, SITE } from '../data/site';
 const path = Astro.url.pathname;
-// 只有指向当前页面本身的站内链接才标记为当前页（锚点和其他官方站点不标记）
+// 只有指向当前页面本身的站内链接才标记为当前页（锚点不标记）
 const isActive = (href: string) => href.startsWith('/') && !href.includes('#') && href === path;
 ---
 <header class="site-header" data-header>

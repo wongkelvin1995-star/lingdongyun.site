@@ -7,17 +7,9 @@ import { SITE, readMinutes } from '../../data/site';
 import { WEBSITE_REF, breadcrumbs } from '../../data/jsonld';
 
 const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
-const title = '灵动云官网资料：官方站点说明、套餐价格与服务说明';
+const title = '灵动云官网资料：官网说明、套餐价格与服务说明';
 const description =
-  '灵动云官网资料目录：官方站点说明讲清五个官方域名的分工与辨认方法，套餐价格与服务说明列出 9 档套餐的价格、计费规则和线路节点；客户端教程、选购建议、问题排查与新手步骤在对应的官方站点。';
-
-// 其他内容所在的官方站点（只链接各站首页）
-const elsewhere = [
-  { name: '灵动云使用指南', domain: 'lingdongyun.website', url: 'https://lingdongyun.website/', text: 'Clash、Clash Party、小火箭、v2rayN 等客户端的订阅导入与节点切换步骤。', icon: 'book' },
-  { name: '灵动云套餐选择', domain: 'lingdongyun.best', url: 'https://lingdongyun.best/', text: '不知道买哪一档时，先估算每月用量，再对照 9 档套餐的选购建议。', icon: 'layers' },
-  { name: '灵动云帮助中心', domain: 'lingdongyun.sbs', url: 'https://lingdongyun.sbs/', text: '连不上、订阅更新失败或速度变慢时的排查步骤，以及在线客服入口。', icon: 'chat' },
-  { name: '灵动云新手入门', domain: 'lingdongyun.lol', url: 'https://lingdongyun.lol/', text: '第一次使用时，按四步完成注册、选套餐、导入订阅和连接测试。', icon: 'compass' },
-] as const;
+  '灵动云官网资料目录：官网说明讲清官网是哪个、怎样辨认官方入口、怎么联系客服，套餐价格与服务说明列出 9 档套餐的价格、计费规则和线路节点。';
 
 const jsonLd = [
   {
@@ -45,7 +37,7 @@ const jsonLd = [
     <div class="container">
       <Breadcrumb items={[{ name: '首页', href: '/' }, { name: '官网资料' }]} />
       <h1>灵动云官网资料</h1>
-      <p>官网保留两份参考资料：一份说明五个官方站点各自做什么，一份列出 9 档套餐的价格和服务规则。客户端教程、选购建议、问题排查和新手步骤，分别放在对应的官方站点。</p>
+      <p>官网保留两份参考资料：一份说明官网是哪个、怎样辨认官方入口和联系客服，一份列出 9 档套餐的价格和服务规则。</p>
     </div>
   </div>
   <div class="container list-body">
@@ -62,24 +54,6 @@ const jsonLd = [
         </li>
       ))}
     </ul>
-
-    <section class="elsewhere" aria-labelledby="elsewhere-title">
-      <h2 id="elsewhere-title">更多内容在官方站点</h2>
-      <p class="el-lead">下面四类内容不在官网，而是由专门的官方站点负责：</p>
-      <ul class="el-list">
-        {elsewhere.map((s) => (
-          <li>
-            <span class="el-icon"><Icon name={s.icon} size={20} /></span>
-            <span class="el-text">
-              <a href={s.url}>{s.name}</a>
-              <small>{s.domain}</small>
-              <span>{s.text}</span>
-            </span>
-            <span class="el-go" aria-hidden="true"><Icon name="external" size={18} /></span>
-          </li>
-        ))}
-      </ul>
-    </section>
 
     <div class="list-cta">
       <a class="btn btn-outline" href="/">返回首页</a>
@@ -115,28 +89,6 @@ const jsonLd = [
   .g-more :global(svg) { transition: transform .25s var(--ease); }
   .g-list li:hover .g-more :global(svg) { transform: translateX(3px); }
 
-  /* 其他官方站点：与首页名录同一种行样式 */
-  .elsewhere { margin-top: 72px; }
-  .elsewhere h2 { font-size: clamp(22px, 2.6vw, 30px); }
-  .el-lead { margin-top: 10px; color: var(--muted); }
-  .el-list {
-    list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-    border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: linear-gradient(180deg, rgba(22, 15, 43, 0.6), rgba(17, 12, 32, 0.6));
-  }
-  .el-list li { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 20px; gap: 18px; align-items: start; padding: 24px 28px; transition: background-color .25s var(--ease); }
-  .el-list li:nth-child(n + 3) { border-top: 1px solid var(--line); }
-  .el-list li:nth-child(even) { border-left: 1px solid var(--line); }
-  .el-list li:hover { background: rgba(139, 92, 246, 0.06); }
-  .el-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--r-sm); border: 1px solid var(--line-2); background: rgba(139, 92, 246, 0.06); color: var(--accent-hi); }
-  .el-text { display: flex; flex-direction: column; min-width: 0; }
-  .el-text a { font-weight: 600; color: var(--text); }
-  .el-text a::after { content: ''; position: absolute; inset: 0; }
-  .el-text a:hover { color: #fff; }
-  .el-text small { font-size: 13px; font-weight: 500; letter-spacing: 0.02em; color: var(--accent-hi); }
-  .el-text span { margin-top: 8px; font-size: 14.5px; line-height: 1.7; color: var(--muted); }
-  .el-go { padding-top: 2px; color: var(--faint); transition: color .25s var(--ease), transform .25s var(--ease); }
-  .el-list li:hover .el-go { color: var(--accent-hi); transform: translate(2px, -2px); }
-
   .list-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--line); }
   @media (max-width: 760px) {
     .list-hero { padding: 20px 0 40px; }
@@ -144,10 +96,6 @@ const jsonLd = [
     .list-body { padding-top: 40px; padding-bottom: 72px; }
     .g-list { grid-template-columns: 1fr; }
     .g-list li { padding: 24px 20px; }
-    .el-list { grid-template-columns: 1fr; }
-    .el-list li { padding: 20px 16px; gap: 14px; }
-    .el-list li:nth-child(even) { border-left: 0; }
-    .el-list li + li { border-top: 1px solid var(--line); }
     .list-cta .btn { flex: 1 1 100%; }
   }
 </style>

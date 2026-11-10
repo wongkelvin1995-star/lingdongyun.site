@@ -55,7 +55,7 @@ for (const f of htmlFiles) {
     if (/noindex/.test(html)) issues.push('正式页面含 noindex');
     if (!canon) issues.push('缺少 canonical');
     else if (canon[1] !== ORIGIN + route) issues.push(`canonical 不匹配：${canon[1]}`);
-    if (!html.includes('href="/guides/lingdongyun-official/"')) issues.push('缺少官方站点说明链接（页脚声明）');
+    if (!html.includes('href="/guides/lingdongyun-official/"')) issues.push('缺少官网说明链接（页脚）');
   }
   for (const re of BANNED) if (re.test(strip(html))) issues.push(`含不允许的表述：${re}`);
   // 链接
@@ -87,7 +87,7 @@ for (const f of htmlFiles) {
 }
 console.log(`  注册入口链接总数：${registerCount}（全部为完整原始链接）`);
 
-console.log('\n[首页] 套餐、板块与官方站点区块');
+console.log('\n[首页] 套餐与板块');
 const homeRaw = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
 const home = homeRaw.replace(/ data-astro-cid-\w+/g, '');
 const cards = [...home.matchAll(/<li class="plan card[^"]*"[^>]*>([\s\S]*?)<\/li>/g)].map((m) => m[1]);
@@ -103,12 +103,8 @@ PLANS.forEach(([name, price, bill, traffic], i) => {
   good && ldGood ? ok(`${name} ¥${price} ${bill} ${traffic}`) : fail(`${name} 不一致`);
 });
 strip(home).includes('价格以用户中心实时显示为准') ? ok('价格说明文字存在') : fail('缺少“价格以用户中心实时显示为准”');
-const order = ['id="pricing"', 'id="service"', 'id="sites"', 'id="faq"', '<footer'].map((s) => home.indexOf(s));
-order.every((v, i) => v > -1 && (i === 0 || v > order[i - 1])) ? ok('板块顺序：套餐 → 服务说明 → 官方站点 → FAQ → 页脚') : fail('板块顺序错误');
-home.includes('data-ldy-family') ? ok('官方站点区块（data-ldy-family）存在') : fail('缺少官方站点区块');
-for (const u of ['https://lingdongyun.website/', 'https://lingdongyun.best/', 'https://lingdongyun.sbs/', 'https://lingdongyun.lol/']) {
-  if (!home.includes(`href="${u}"`)) fail(`首页缺少官方站点链接 ${u}`);
-}
+const order = ['id="pricing"', 'id="service"', 'id="faq"', '<footer'].map((s) => home.indexOf(s));
+order.every((v, i) => v > -1 && (i === 0 || v > order[i - 1])) ? ok('板块顺序：套餐 → 服务说明 → FAQ → 页脚') : fail('板块顺序错误');
 const faqCount = (home.match(/<details class="faq-item/g) || []).length;
 faqCount >= 5 ? ok(`FAQ 共 ${faqCount} 条（details/summary）`) : fail('FAQ 不足 5 条');
 
@@ -116,7 +112,7 @@ console.log('\n[官网资料] 正文汉字数、链接与结构化数据');
 const guideRoutes = htmlFiles.map(toRoute).filter((r) => /^\/guides\/[^/]+\/$/.test(r));
 for (const r of guideRoutes) {
   const html = fs.readFileSync(path.join(DIST, r, 'index.html'), 'utf8');
-  const body = html.match(/<article class="prose"[^>]*>([\s\S]*?)<\/article>/)[1].replace(/<section[^>]*data-ldy-family[\s\S]*?<\/section>/, '');
+  const body = html.match(/<article class="prose"[^>]*>([\s\S]*?)<\/article>/)[1];
   const hanzi = (strip(body).match(/[一-鿿]/g) || []).length;
   const links = new Set([...body.matchAll(/href="([^"]+)"/g)].map((m) => m[1]));
   const h2 = (body.match(/<h2/g) || []).length;
@@ -137,7 +133,7 @@ for (const r of guideRoutes) {
   issues.length ? (fail(r), issues.forEach((i) => console.log('      - ' + i))) : ok(`${r}  汉字 ${hanzi}｜正文链接 ${links.size}｜H2 ${h2}｜相关阅读 ${relCount}`);
 }
 
-console.log('\n[sitemap / robots / llms / _redirects]');
+console.log('\n[sitemap / robots / llms]');
 const sm = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
 const locs = [...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 const smBad = locs.filter((l) => !l.startsWith(ORIGIN + '/') || l.includes('#') || l.includes('?') || l.includes('404') || !exists(l.slice(ORIGIN.length)));
@@ -148,13 +144,19 @@ missing.length ? fail('sitemap 缺少：' + missing.join(', ')) : ok('全部可�
 const robots = fs.readFileSync(path.join(DIST, 'robots.txt'), 'utf8').trim();
 robots === 'User-agent: *\nAllow: /\n\nSitemap: https://lingdongyun.site/sitemap.xml' ? ok('robots.txt 内容正确') : fail('robots.txt 内容不符');
 fs.existsSync(path.join(DIST, 'llms.txt')) ? ok('llms.txt 已生成') : fail('缺少 llms.txt');
-const redirects = fs.existsSync(path.join(DIST, '_redirects'))
-  ? fs.readFileSync(path.join(DIST, '_redirects'), 'utf8').split('\n').filter((l) => l.trim() && !l.startsWith('#'))
-  : [];
-redirects.length === 20 && redirects.every((l) => / 301$/.test(l.trim()))
-  ? ok('_redirects：10 篇已迁出文章 × 2 种写法，全部 301')
-  : fail(`_redirects 规则数 ${redirects.length}`);
+fs.existsSync(path.join(DIST, '_redirects')) ? fail('不应存在 _redirects（本站不向其他域名跳转）') : ok('无 _redirects：本站不跳转到其他域名');
 for (const a of ['favicon.svg', 'favicon-32.png', 'apple-touch-icon.png', 'og-image.png', 'logo-512.png']) fs.existsSync(path.join(DIST, a)) ? ok(a) : fail('缺少 ' + a);
+
+console.log('\n[独立性] dist 中不得出现其他灵动云域名');
+const SIBLINGS = /(?:^|[^a-z0-9-])(?:www\.)?lingdongyun\.(?:website|best|lol|sbs)\b/i;
+const textExt = /\.(html|xml|txt|js|css|json|svg|webmanifest|map)$/i;
+const leaks = [];
+for (const f of files.filter((f) => textExt.test(f) || path.basename(f) === '_redirects' || path.basename(f) === '_headers')) {
+  const t = fs.readFileSync(f, 'utf8');
+  const m = t.match(SIBLINGS);
+  if (m) leaks.push(`${toRoute(f)}：${m[0].trim()}`);
+}
+leaks.length ? (fail('发现其他灵动云域名的引用'), leaks.slice(0, 20).forEach((l) => console.log('      - ' + l))) : ok(`dist 共 ${files.length} 个文件，无其他灵动云域名的引用`);
 
 console.log(errors ? `\n结果：${errors} 项问题\n` : '\n结果：全部检查通过\n');
 process.exit(errors ? 1 : 0);

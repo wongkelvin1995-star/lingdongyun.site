@@ -1,4 +1,4 @@
-// 全站共享的品牌信息、官方站点、套餐数据与 FAQ。
+// 全站共享的品牌信息、套餐数据与 FAQ。
 // 修改此处即可同步首页、套餐价格与服务说明、结构化数据与 llms.txt。
 // 套餐与服务事实只来自运营面板（2026-11-01），不要自行补充周期价格、速度或时效承诺。
 
@@ -14,45 +14,22 @@ export const SITE = {
   orgId: 'https://lingdongyun.site/#org',
   websiteId: 'https://lingdongyun.site/#website',
   description:
-    '灵动云（Lingdongyun）官方网站：9 档套餐，月付 ¥20 起、年付 ¥99、一次性流量包 ¥199 起，另有至尊私人定制；不限速、不限设备，IEPL/IPLC 优化线路。提供注册入口、常见问题与官方站点说明。',
+    '灵动云（Lingdongyun）官方网站：9 档套餐，月付 ¥20 起、年付 ¥99、一次性流量包 ¥199 起，另有至尊私人定制；不限速、不限设备，IEPL/IPLC 优化线路。提供注册入口、常见问题与官网说明。',
   orgDescription:
     '灵动云是提供代理节点订阅的网络服务品牌，设有月付、年付、一次性流量包与至尊私人定制共 9 档套餐。',
   ogImage: '/og-image.png',
   // 站点内容日期（真实日期，非构建时间）
   published: '2026-10-17',
-  updated: '2026-11-01',
+  updated: '2026-11-10',
 } as const;
 
-/** 五个官方站点，顺序固定（官网、使用指南、套餐选择、帮助中心、新手入门） */
-export const OFFICIAL_SITES = [
-  { key: 'site', name: '灵动云官网', role: '官网', domain: 'lingdongyun.site', url: 'https://lingdongyun.site/', desc: '品牌介绍、9 档套餐与注册入口', icon: 'globe' },
-  { key: 'website', name: '灵动云使用指南', role: '使用指南', domain: 'lingdongyun.website', url: 'https://lingdongyun.website/', desc: '按设备整理的客户端与订阅导入教程', icon: 'book' },
-  { key: 'best', name: '灵动云套餐选择', role: '套餐选择', domain: 'lingdongyun.best', url: 'https://lingdongyun.best/', desc: '9 档套餐对比与每月流量估算', icon: 'layers' },
-  { key: 'sbs', name: '灵动云帮助中心', role: '帮助中心', domain: 'lingdongyun.sbs', url: 'https://lingdongyun.sbs/', desc: '连接问题排查、网络知识与在线客服', icon: 'chat' },
-  { key: 'lol', name: '灵动云新手入门', role: '新手入门', domain: 'lingdongyun.lol', url: 'https://lingdongyun.lol/', desc: '注册、选套餐、导入订阅、连接，4 步上手', icon: 'compass' },
-] as const;
-
-/** 站外链接只使用官方站点清单中的最终地址 */
-export const LINKS = {
-  bestHome: 'https://lingdongyun.best/',
-  bestChoosePlan: 'https://lingdongyun.best/guides/choose-plan',
-  bestEstimate: 'https://lingdongyun.best/guides/estimate-traffic',
-  websiteHome: 'https://lingdongyun.website/',
-  websiteChooseClient: 'https://lingdongyun.website/guides/choose-client/',
-  sbsHome: 'https://lingdongyun.sbs/',
-  sbsTroubleshooting: 'https://lingdongyun.sbs/guides/troubleshooting/',
-  lolHome: 'https://lingdongyun.lol/',
-} as const;
-
-// 官网导航：站内页面 + 使用指南、帮助中心两个官方站点
+// 官网导航：只含本站页面
 export const NAV = [
   { label: '首页', href: '/' },
   { label: '套餐价格', href: '/#pricing' },
   { label: '官网资料', href: '/guides/' },
-  { label: '官方站点', href: '/guides/lingdongyun-official/' },
+  { label: '官网说明', href: '/guides/lingdongyun-official/' },
   { label: '常见问题', href: '/#faq' },
-  { label: '使用指南', href: LINKS.websiteHome },
-  { label: '帮助中心', href: LINKS.sbsHome },
 ] as const;
 
 export type PlanCategory = 'monthly' | 'yearly' | 'onetime' | 'custom';
@@ -149,7 +126,7 @@ export const COMMON_FACTS = [
   { label: '节点地区', value: '香港、台湾、日本、新加坡、美国等' },
   { label: '流媒体', value: 'Netflix、Disney+、YouTube 等' },
   { label: 'AI 工具', value: '适配 ChatGPT、Claude 等' },
-  { label: '售后', value: '在线客服、用户中心工单' },
+  { label: '售后', value: '用户中心工单' },
 ] as const;
 
 export interface Faq {
@@ -158,16 +135,16 @@ export interface Faq {
   link?: { href: string; text: string; external?: boolean };
 }
 
-// 首页 FAQ：品牌层面的问题，具体操作指向对应的官方站点
+// 首页 FAQ：品牌层面的问题
 export const FAQS: Faq[] = [
   {
     q: '灵动云官网是哪个网站？',
-    a: '灵动云官网是 lingdongyun.site，也是五个官方站点中唯一的官网。另外四个官方站点分别负责使用指南、套餐选择、帮助中心和新手入门，完整清单与辨认方法写在官方站点说明里。',
-    link: { href: '/guides/lingdongyun-official/', text: '查看官方站点说明' },
+    a: '灵动云官网是 lingdongyun.site，品牌介绍、9 档套餐价格和注册入口都以本站为准。怎样确认自己打开的是官方入口、遇到名称相似的网站怎么办，写在官网说明里。',
+    link: { href: '/guides/lingdongyun-official/', text: '查看官网说明' },
   },
   {
     q: '怎么注册灵动云账号？',
-    a: '点击本站任一「注册 / 登录」或「选择此套餐」按钮，会在新标签页打开灵动云用户中心，注册账号和购买套餐都在那里完成，五个官方站点上的注册按钮打开的是同一个用户中心。买好套餐后，订阅链接向帮助中心的在线客服领取，说明设备和客户端即可。',
+    a: '点击本站任一「注册 / 登录」或「选择此套餐」按钮，会在新标签页打开灵动云用户中心，注册账号和购买套餐都在那里完成。买好套餐后，订阅链接通过用户中心工单领取，说明设备和客户端即可。',
     link: { href: SITE.registerUrl, text: '前往用户中心注册', external: true },
   },
   {
@@ -177,23 +154,23 @@ export const FAQS: Faq[] = [
   },
   {
     q: '支持哪些设备和客户端？',
-    a: '设备数量不限，Windows、macOS、Android、iPhone 和 iPad 都能使用。订阅采用 SS（Shadowsocks）协议，Clash 系列、小火箭（Shadowrocket）、v2rayN / v2rayNG 等常见客户端都可以导入；每种设备该装哪个客户端，使用指南站有逐一对照。',
-    link: { href: LINKS.websiteChooseClient, text: '按设备选择客户端' },
+    a: '设备数量不限，Windows、macOS、Android、iPhone 和 iPad 都能使用。订阅采用 SS（Shadowsocks）协议，Clash 系列、小火箭（Shadowrocket）、v2rayN / v2rayNG 等常见客户端都可以导入；不确定某台设备该装哪个客户端时，可以通过用户中心工单咨询。',
+    link: { href: '/guides/plan-selection/#lines', text: '查看线路与协议说明' },
   },
   {
     q: '第一次使用，应该从哪里开始？',
-    a: '按「注册账号 → 选择套餐 → 在客户端导入订阅 → 连接并测试」的顺序来。新手入门站把这四步放在同一页，每一步都附有对应的详细教程。',
-    link: { href: LINKS.lolHome, text: '打开新手入门' },
+    a: '按「注册账号 → 选择套餐 → 领取订阅链接 → 在客户端导入订阅并连接测试」的顺序来。选套餐时可以对照价格说明页，逐档查看价格、流量和计费规则。',
+    link: { href: '/guides/plan-selection/', text: '对照套餐价格与服务说明' },
   },
   {
     q: '连不上或速度变慢怎么办？',
-    a: '先确认套餐没有到期、流量没有用完，再在客户端里更新订阅、换一个节点重试。仍然不行时，帮助中心按订阅更新失败、节点超时、速度慢等症状整理了排查步骤。',
-    link: { href: LINKS.sbsTroubleshooting, text: '查看连接问题排查' },
+    a: '先确认套餐没有到期、流量没有用完，再在客户端里更新订阅、换一个节点重试。仍然不行时，通过用户中心工单联系客服，写明设备、客户端和出现问题的时间。',
+    link: { href: SITE.registerUrl, text: '登录用户中心提交工单', external: true },
   },
   {
     q: '怎么联系客服？',
-    a: '售后有两个渠道：帮助中心 lingdongyun.sbs 的在线客服，以及用户中心工单。描述问题时写明设备、客户端和出现问题的时间，截图前遮住订阅链接。',
-    link: { href: LINKS.sbsHome, text: '前往帮助中心' },
+    a: '售后通过用户中心工单处理，所有套餐使用相同的售后渠道。描述问题时写明设备、客户端和出现问题的时间，截图前遮住订阅链接。',
+    link: { href: '/guides/plan-selection/#support', text: '查看售后与客服渠道' },
   },
 ];
 

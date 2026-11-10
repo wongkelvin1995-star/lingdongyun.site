@@ -3,7 +3,6 @@ import '../styles/global.css';
 // 自托管 Manrope（@fontsource-variable/manrope，只用拉丁子集约 25 KB）：拉丁字母与数字的展示字体，中文走系统字体
 import manropeLatin from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
 import Header from '../components/Header.astro';
-import GlobalNav from '../components/GlobalNav.astro';
 import MotionHead from '../components/MotionHead.astro';
 import MotionIntro from '../components/MotionIntro.astro';
 import MotionReveal from '../components/MotionReveal.astro';
@@ -74,7 +73,6 @@ const graph = { '@context': 'https://schema.org', '@graph': [...siteNodes(), ...
   <body>
     <MotionIntro />
     <a class="skip-link" href="#main">跳到主要内容</a>
-    <GlobalNav />
     <Header />
     <main id="main">
       <slot />

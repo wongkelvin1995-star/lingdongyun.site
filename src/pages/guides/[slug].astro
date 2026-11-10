@@ -2,7 +2,6 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
-import Family from '../../components/Family.astro';
 import PlanTable from '../../components/PlanTable.astro';
 import Icon from '../../components/Icon.astro';
 import { SITE } from '../../data/site';
@@ -69,7 +68,6 @@ const jsonLd = [
   <div class="container narrow">
     <article class="prose" data-article-body>
       {d.lead && <p class="lead">{d.lead}</p>}
-      {d.family && <Family variant="rows" showMore={false} />}
       {d.planTable && <PlanTable />}
       <Content />
       {d.faqs.length > 0 && (
