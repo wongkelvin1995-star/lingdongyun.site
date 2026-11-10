@@ -18,13 +18,13 @@ npm run check:site # 构建后自动检查（链接、canonical、套餐、字�
 
 ```
 src/
-  data/site.ts            品牌信息、注册链接、五个官方站点、9 档套餐、FAQ（全站唯一数据源）
+  data/site.ts            品牌信息、注册链接、9 档套餐、FAQ（全站唯一数据源）
   data/jsonld.ts          结构化数据（Organization @id 统一为 https://lingdongyun.site/#org）
-  content/guides/*.md     官网资料 2 篇：官方站点说明、套餐价格与服务说明（Markdown）
+  content/guides/*.md     官网资料 2 篇：官网说明、套餐价格与服务说明（Markdown）
   content.config.ts       文章字段定义
   layouts/Base.astro      公共 <head>、SEO 标签、页头页脚
   components/             Header / Footer / HeroArt（原创 SVG 插画）/ Logo / Icon / Breadcrumb /
-                          Family（灵动云官方站点区块，data-ldy-family）/ PlanTable（9 档价格表）
+                          PlanTable（9 档价格表）
   pages/
     index.astro           首页
     guides/index.astro    文章列表 /guides/
@@ -33,7 +33,7 @@ src/
     sitemap.xml.ts        XML 网站地图（lastmod 取内容真实日期）
     llms.txt.ts           内容导航 /llms.txt
     404.astro             404 页面（noindex）
-public/                   favicon、分享图 og-image.png、robots.txt、_redirects（已迁出文章的 301）
+public/                   favicon、分享图 og-image.png、robots.txt
 public/brand/logo.svg     品牌标志（全站唯一来源，见下文）
 scripts/check-site.mjs    构建后检查脚本
 scripts/gen-heroart.py    生成首页 Hero 线框地球插画（HeroArt.astro）
@@ -49,8 +49,8 @@ dist/                     构建产物（直接部署这个目录）
 
 ## 修改内容
 
-- **套餐 / 注册链接 / FAQ / 官方站点清单**：只改 `src/data/site.ts`，首页、价格表、结构化数据和 llms.txt 会同步更新。套餐信息只按运营面板填写，不要自行补充其他周期价格或服务承诺。
-- **已迁出的文章**：客户端教程、选购指南、排查与安全类文章已迁到其他官方站点，旧地址在 `public/_redirects` 中 301 跳转，不要再在本站新建同类文章。
+- **套餐 / 注册链接 / FAQ**：只改 `src/data/site.ts`，首页、价格表、结构化数据和 llms.txt 会同步更新。套餐信息只按运营面板填写，不要自行补充其他周期价格或服务承诺。
+- **本站独立运行**：本站与灵动云其他域名之间不设任何链接、跳转、结构化数据引用或 sitemap 条目；`npm run build` 后运行 `node scripts/check-site.mjs`，会断言 dist 中没有其他灵动云域名的引用。不要在本站加入指向其他域名的链接或 `_redirects` 跳转。
 - **文章**：编辑 `src/content/guides/*.md`。实质修改后同步更新 frontmatter 的 `updated` 日期（会写入页面和 sitemap 的 lastmod）。
 - **站点更新日期**：修改首页内容后，同步更新 `src/data/site.ts` 中的 `updated`。
 
@@ -70,7 +70,7 @@ dist/                     构建产物（直接部署这个目录）
 4. 按平台给出的记录到域名注册商处修改 DNS（CNAME 或 A 记录）。DNS 修改需要你本人操作。
 5. 平台会自动签发 HTTPS 证书。确认 `http://` 自动跳转到 `https://`。
 
-这几个平台会自动把 `dist/404.html` 作为不存在路径的页面，并返回 404 状态码。Cloudflare Pages 与 Netlify 会读取 `dist/_redirects` 中的 301 规则；使用 Vercel 时需要在 `vercel.json` 的 `redirects` 中配置同样的跳转。
+这几个平台会自动把 `dist/404.html` 作为不存在路径的页面，并返回 404 状态码。
 
 ### 方式 B：自有服务器（Nginx）
 
@@ -109,19 +109,11 @@ server {
 }
 ```
 
-Nginx 不读取 `_redirects`，需要把其中每条规则改写为 `location`，例如：
-
-```nginx
-location = /guides/getting-started/ { return 301 https://lingdongyun.lol/; }
-location = /guides/getting-started  { return 301 https://lingdongyun.lol/; }
-```
-
 HTTPS 证书可用 Let's Encrypt（certbot）免费签发。
 
 ### 上线后检查
 
 - 访问 `https://lingdongyun.site/`、`/guides/`、任意文章页正常打开；
-- 访问一个已迁出的旧地址（如 `/guides/clash-nodes/`）返回 301 并跳到对应的官方站点；
 - 访问一个不存在的地址（如 `/abc/`）返回 404 页面且状态码为 404；
 - `https://lingdongyun.site/robots.txt`、`/sitemap.xml` 可访问；
 - 可在 Google Search Console、Bing Webmaster Tools、百度搜索资源平台验证站点后提交 sitemap.xml（是否收录与排名由搜索引擎决定）。

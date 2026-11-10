@@ -4,8 +4,7 @@ import FlameScript from '../components/FlameScript.astro';
 import Base from '../layouts/Base.astro';
 import HeroLogo from '../components/HeroLogo.astro';
 import Icon from '../components/Icon.astro';
-import Family from '../components/Family.astro';
-import { COMMON_FACTS, FAQS, LINKS, PLANS, PLAN_FILTERS, PLAN_NOTE, SITE, perMonth, saving, yuan } from '../data/site';
+import { COMMON_FACTS, FAQS, PLANS, PLAN_FILTERS, PLAN_NOTE, SITE, perMonth, saving, yuan } from '../data/site';
 import { faqPage, planCatalog } from '../data/jsonld';
 
 const title = '灵动云官网｜灵动云机场套餐价格与注册入口（Lingdongyun）';
@@ -22,7 +21,7 @@ const FACTS = [
   { icon: 'gauge', text: '不限速' },
   { icon: 'devices', text: '不限设备' },
   { icon: 'route', text: 'IEPL / IPLC 优化线路' },
-  { icon: 'chat', text: '在线客服与工单' },
+  { icon: 'chat', text: '用户中心工单' },
 ] as const;
 
 const jsonLd = [planCatalog(home), faqPage(home, FAQS)];
@@ -140,7 +139,6 @@ const jsonLd = [planCatalog(home), faqPage(home, FAQS)];
       <div class="plan-foot">
         <p class="plan-note">{PLAN_NOTE}</p>
         <div class="plan-links">
-          <a href={LINKS.bestHome}>不确定选哪档？用套餐选择估算每月流量<Icon name="arrow" size={16} /></a>
           <a href="/guides/plan-selection/">完整价格表与计费规则<Icon name="arrow" size={16} /></a>
         </div>
       </div>
@@ -154,7 +152,7 @@ const jsonLd = [planCatalog(home), faqPage(home, FAQS)];
         <span class="eyebrow">服务说明</span>
         <h2 id="service-title">9 档套餐共用的服务规则</h2>
         <p>无论选月付、年付、流量包还是私人定制，以下规则都相同：<strong>不限速</strong>、按 <strong>1.0 倍率</strong>计费、<strong>不限设备数量</strong>，协议、线路与节点地区也一致。至尊私人定制在此基础上另配独立带宽和专属公网 IP，不与其他用户共享。</p>
-        <p>售后有两个渠道：<a href={LINKS.sbsHome}>帮助中心</a>的在线客服，以及用户中心工单。</p>
+        <p>售后通过用户中心工单处理，所有套餐使用相同的售后渠道。</p>
         <a class="about-link" href="/guides/plan-selection/">逐档查看计费规则、线路与节点<Icon name="arrow" size={16} /></a>
       </div>
       <dl class="about-facts card">
@@ -165,20 +163,13 @@ const jsonLd = [planCatalog(home), faqPage(home, FAQS)];
     </div>
   </section>
 
-  <!-- 灵动云官方站点 -->
-  <div class="section section-soft">
-    <div class="container">
-      <Family />
-    </div>
-  </div>
-
   <!-- FAQ：品牌层面的问题 -->
   <section class="section" id="faq" aria-labelledby="faq-title">
     <div class="container faq-grid">
       <div class="section-head">
         <span class="eyebrow">FAQ</span>
         <h2 id="faq-title">常见问题</h2>
-        <p>关于官网、注册、价格、设备与售后的简要回答，详细内容在对应的官方站点。</p>
+        <p>关于官网、注册、价格、设备与售后的简要回答，详细规则见套餐价格与服务说明。</p>
       </div>
       <div class="faq-list">
         {FAQS.map((f, i) => (

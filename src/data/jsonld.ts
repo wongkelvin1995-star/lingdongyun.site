@@ -19,7 +19,7 @@ export const siteNodes = (): Node[] => [
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      url: 'https://lingdongyun.sbs/',
+      url: `${SITE.url}${SITE.officialPath}`,
       availableLanguage: ['zh-CN'],
     },
   },
